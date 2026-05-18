@@ -1,0 +1,6 @@
+insight_name,dimension,key_finding,business_meaning,recommended_action
+Middle-aged Elite,Age + Gender + AOV,Male customers around age 45 peak in both customer volume and AOV,This group is the core profit driver of the platform,Launch premium electronics campaigns with expert reviews and VIP services
+Knowledge Penetration,Rural Region + Books,Rural high-value customers show strong preference and high AOV in the Books category,Rural market contains underexplored knowledge consumption demand,Create curated book bundles and knowledge-oriented content campaigns
+Pareto Value Pyramid,Customer Value Contribution,Top 10% customers contribute more than 40% of GMV,Revenue is highly concentrated among premium customers,Prioritize retention resources for top-tier customers
+Churn Recovery,Rural/Suburban + Electronics,Churn-risk users show high historical AOV and preference for electronics,These users are dormant high-value customers rather than low-quality inactive users,Build win-back campaigns with logistics follow-up and electronics upgrade reminders
+

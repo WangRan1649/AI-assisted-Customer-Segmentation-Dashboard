@@ -1,0 +1,9 @@
+segment,share,business_role,frequency_range,monetary_range,category_preference,key_issue,action_priority
+High-value Customers,27.7%,Core profit engine,5-9 purchases,¥2500-¥5000,Apparel and Home,Need loyalty protection and VIP retention,Stabilize
+Potential Customers,27.0%,Growth engine,0-4 purchases,Medium spending,Electronics and Books,Large base but low repurchase frequency,Convert
+Churn-risk Customers,22.0%,Dormant premium assets,Low recent activity,Historical AOV > ¥3000,Electronics,Potential churn caused by logistics and after-sales issues,Recover
+Regular Retained Customers,15.0%,Traffic foundation,High frequency,AOV < ¥2500,Beauty and daily consumables,Promotion-sensitive with low basket size,Upsell
+Other Customers,8.3%,Long-tail users,Low frequency,Low spending,Mixed categories,Low engagement and limited short-term value,Nurture
+
+
+
