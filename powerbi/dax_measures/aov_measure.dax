@@ -1,0 +1,60 @@
+-- Current model type:
+-- User-level behavior summary table, not raw order-level transaction table.
+-- The dataset contains Total_Spending and Purchase_Frequency, but no OrderID.
+-- Therefore, AOV is calculated as weighted AOV:
+-- Total Spending / Total Purchase Frequency.
+
+-- Customer Count
+Customer Count =
+DISTINCTCOUNT(Fact_User_Behavior[User_ID])
+
+-- Total Spending
+Total Spending =
+SUM(Fact_User_Behavior[Total_Spending])
+
+-- Total Purchase Frequency
+Total Purchase Frequency =
+SUM(Fact_User_Behavior[Purchase_Frequency])
+
+-- Weighted AOV
+Weighted AOV =
+DIVIDE(
+    [Total Spending],
+    [Total Purchase Frequency]
+)
+
+-- Segment Share
+Segment Share =
+DIVIDE(
+    [Customer Count],
+    CALCULATE(
+        [Customer Count],
+        ALLSELECTED(Fact_User_Behavior[用户类型])
+    )
+)
+
+-- Average F Score
+Average F Score =
+AVERAGE(Fact_User_Behavior[F_Score])
+
+-- Average M Score
+Average M Score =
+AVERAGE(Fact_User_Behavior[M_Score])
+
+-- Average R Score
+Average R Score =
+AVERAGE(Fact_User_Behavior[R_Score])
+
+-- Average Last Login Days
+Average Last Login Days =
+AVERAGE(Fact_User_Behavior[Last_Login_Days_Ago])
+
+-- Value Proxy Score
+Value Proxy Score =
+[Weighted AOV] * [Average F Score]
+
+-- If raw order-level transaction data becomes available in the future:
+-- Total Sales = SUM(Sales[Amount])
+-- Order Count = DISTINCTCOUNT(Sales[OrderID])
+-- AOV = DIVIDE([Total Sales], [Order Count])
+
