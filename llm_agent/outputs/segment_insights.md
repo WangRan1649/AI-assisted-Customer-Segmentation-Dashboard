@@ -1,13 +1,4 @@
-def call_llm(prompt: str) -> str:
-    """
-    Mock LLM client for portfolio development.
 
-    This version does not call any external API.
-    It returns a fixed AI-generated insight report so the full
-    Power BI + Python + LLM workflow can be tested locally.
-    """
-
-    return """
 # AI-generated Customer Segmentation Insights
 
 ## 1. Executive Summary
@@ -51,4 +42,3 @@ Recommended action: Use bundle promotions, cross-selling, and threshold-based di
 - Review all AI-generated marketing messages for accuracy and compliance.
 - Validate regional logistics and after-sales capacity before targeting rural and suburban users.
 - Approve final campaign strategy manually before any customer-facing action.
-"""
