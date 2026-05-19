@@ -1,6 +1,5 @@
-insight_name,dimension,key_finding,business_meaning,recommended_action
-Middle-aged Elite,Age + Gender + AOV,Male customers around age 45 peak in both customer volume and AOV,This group is the core profit driver of the platform,Launch premium electronics campaigns with expert reviews and VIP services
-Knowledge Penetration,Rural Region + Books,Rural high-value customers show strong preference and high AOV in the Books category,Rural market contains underexplored knowledge consumption demand,Create curated book bundles and knowledge-oriented content campaigns
-Pareto Value Pyramid,Customer Value Contribution,Top 10% customers contribute more than 40% of GMV,Revenue is highly concentrated among premium customers,Prioritize retention resources for top-tier customers
-Churn Recovery,Rural/Suburban + Electronics,Churn-risk users show high historical AOV and preference for electronics,These users are dormant high-value customers rather than low-quality inactive users,Build win-back campaigns with logistics follow-up and electronics upgrade reminders
-
+﻿insight_name,dimension,key_finding,business_meaning,recommended_action
+Elite Customer Segment,Age + Gender + Weighted AOV,Female customers around age 51 show the highest weighted AOV among groups with sufficient sample size.,This group should be treated as a priority profit-driving segment.,"Design premium product campaigns, expert review content, and VIP service benefits for this segment."
+Regional Category Opportunity,Location + Product Category + Weighted AOV,Suburban customers in the Apparel category show strong weighted AOV performance.,Regional category preference can reveal underexplored market opportunities.,Create region-specific product bundles and content campaigns based on category preference.
+Pareto Value Concentration,Customer Value Contribution,The top 10% users contribute approximately 18.6% of total spending.,Revenue is concentrated among higher-value customers.,Prioritize retention and service resources for top-value users.
+Churn Recovery,Last Login + Total Spending + Category Preference,"18.8% of users are high-spending but inactive, with strongest preference in Home & Kitchen.",These users should be treated as dormant premium assets rather than low-value inactive users.,"Build win-back campaigns with product upgrade reminders, after-sales recovery, and service follow-up."
