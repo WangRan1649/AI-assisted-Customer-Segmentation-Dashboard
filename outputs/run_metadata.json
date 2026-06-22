@@ -1,0 +1,28 @@
+{
+  "run_time_utc": "2026-06-22T03:23:25Z",
+  "raw_files": [
+    {
+      "path": "data/raw/ecommerce_user_behavior_dataset.csv",
+      "row_count": 1001,
+      "cleaned_row_count": 1000,
+      "encoding": "gbk"
+    }
+  ],
+  "raw_row_count": 1001,
+  "cleaned_row_count": 1000,
+  "processed_customer_count": 1000,
+  "requested_provider": "siliconflow",
+  "provider": "siliconflow",
+  "model": "deepseek-ai/DeepSeek-V4-Flash",
+  "api_reached": true,
+  "validation_passed": true,
+  "fallback_used": false,
+  "error": null,
+  "output_files": {
+    "customer_segments": "data/processed/customer_segments.csv",
+    "cross_dimensional_insights": "data/processed/cross_dimensional_insights.csv",
+    "segment_insights": "outputs/segment_insights.md",
+    "powerbi_llm_insights": "outputs/powerbi_llm_insights.csv",
+    "run_metadata": "outputs/run_metadata.json"
+  }
+}

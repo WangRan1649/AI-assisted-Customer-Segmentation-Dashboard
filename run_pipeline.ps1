@@ -1,18 +1,19 @@
 $ErrorActionPreference = "Stop"
 
-Write-Host "========================================"
-Write-Host "AI-assisted Customer Segmentation Pipeline"
-Write-Host "========================================"
+Write-Host "=============================================="
+Write-Host "V3 AI-assisted BI Decision Workflow Pipeline"
+Write-Host "=============================================="
 
 $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $ProjectRoot
 
 $PythonPath = Join-Path $ProjectRoot ".venv\Scripts\python.exe"
-$RawDataPath = Join-Path $ProjectRoot "data\raw\ecommerce_user_behavior_dataset.csv"
+$RawDataDir = Join-Path $ProjectRoot "data\raw"
+$RawCsvFiles = Get-ChildItem -Path $RawDataDir -Filter "*.csv" -File -ErrorAction SilentlyContinue
 
-if (!(Test-Path $RawDataPath)) {
-    Write-Host "ERROR: Raw data file not found."
-    Write-Host "Expected path: $RawDataPath"
+if (!$RawCsvFiles -or $RawCsvFiles.Count -eq 0) {
+    Write-Host "ERROR: No raw CSV files found under data\raw."
+    Write-Host "Put your e-commerce CSV file(s) under: $RawDataDir"
     exit 1
 }
 
@@ -22,26 +23,12 @@ if (!(Test-Path $PythonPath)) {
 }
 
 Write-Host ""
-Write-Host "[1/4] Installing or checking Python dependencies..."
+Write-Host "[1/2] Installing or checking Python dependencies..."
 & $PythonPath -m pip install -r requirements.txt
 
 Write-Host ""
-Write-Host "[2/4] Generating processed business data from raw dataset..."
-& $PythonPath llm_agent\src\prepare_processed_data.py
-
-Write-Host ""
-Write-Host "[3/4] Generating AI insights and Power BI insight CSV..."
-& $PythonPath llm_agent\src\insight_generator.py
-
-Write-Host ""
-Write-Host "[4/4] Pipeline completed successfully."
-
-Write-Host ""
-Write-Host "Generated files:"
-Write-Host "- data\processed\customer_segments.csv"
-Write-Host "- data\processed\cross_dimensional_insights.csv"
-Write-Host "- llm_agent\outputs\segment_insights.md"
-Write-Host "- llm_agent\outputs\powerbi_llm_insights.csv"
+Write-Host "[2/2] Running V3 pipeline..."
+& $PythonPath run_pipeline.py
 
 Write-Host ""
 Write-Host "Next step: Open Power BI and click Home -> Refresh."

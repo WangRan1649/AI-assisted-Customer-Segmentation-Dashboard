@@ -1,347 +1,246 @@
-# AI-assisted Customer Segmentation Dashboard
+# AI-assisted Customer Segmentation Dashboard V3
 
-## Project Overview
+V3 upgrades this project into an **AI-assisted BI Decision Workflow with SiliconFlow API**.
 
-This project upgrades a traditional SQL + Power BI customer segmentation dashboard into an AI-assisted decision intelligence system for e-commerce customer operations.
+After replacing the raw e-commerce CSV files under `data/raw/`, run one pipeline command to regenerate customer segmentation data, AI-assisted marketing insights, Power BI insight CSV, and run metadata.
 
-The original dashboard focused on RFM-based customer segmentation and multi-dimensional business analysis. The upgraded version adds a Python-based LLM insight layer that converts structured customer segment data into executive summaries, marketing recommendations, and human-reviewable business actions.
+## What V3 Generates
 
-The goal is not to replace business analysts. Instead, this project demonstrates how AI can help business teams move from **dashboard viewing** to **decision execution**.
+The main pipeline regenerates:
 
----
+```text
+data/processed/customer_segments.csv
+outputs/segment_insights.md
+outputs/powerbi_llm_insights.csv
+outputs/run_metadata.json
+```
 
-## Business Context
+For compatibility with the earlier Power BI prototype, the insight Markdown and Power BI CSV are also mirrored to:
 
-Many e-commerce teams already have BI dashboards, but dashboards often stop at visualization. Business users still need to manually interpret charts, write reports, identify risks, and design campaign actions.
-
-This project addresses that gap by building a workflow where:
-
-1. SQL and structured CSV files define the customer segmentation logic.
-2. Power BI visualizes customer value, AOV, segment distribution, and cross-dimensional insights.
-3. Python reads structured business data.
-4. A mock LLM client generates AI-assisted business insights.
-5. AI recommendations are exported back into Power BI as an LLM Insight Box.
-6. Every AI-generated recommendation is marked as pending human review.
-
----
-
-## Key Business Findings
-
-### 1. High-value Customers
-
-High-value customers account for **27.7%** of the user base. They are the platform's core profit engine and should be protected through VIP retention, premium product recommendations, and loyalty programs.
-
-### 2. Potential Customers
-
-Potential customers account for **27.0%** of the user base. They have growth potential but relatively low repurchase frequency, which makes them suitable for conversion campaigns, category bundles, and repurchase incentives.
-
-### 3. Churn-risk Customers
-
-Churn-risk customers account for **22.0%** of the user base. More importantly, this group has historically high AOV above **¥3000**, meaning they should be treated as dormant premium customers rather than low-value inactive users.
-
-### 4. Middle-aged Elite Segment
-
-Male customers around age **45** reach the peak in both customer volume and weighted AOV, making them a core profit-driving segment. This group is suitable for premium electronics campaigns, expert reviews, specification comparisons, and VIP services.
-
-### 5. Rural Knowledge Penetration Opportunity
-
-Rural high-value customers show strong preference for the Books category, indicating a **knowledge penetration** opportunity in lower-tier markets. This suggests that rural markets should not be treated only as low-price markets.
-
----
-
-## Tech Stack
-
-| Layer | Tools / Methods |
-|---|---|
-| Data Layer | CSV, SQL logic, RFM segmentation |
-| BI Layer | Power BI, DAX, data modeling |
-| AI Layer | Python, mock LLM client, prompt-based insight generation |
-| Output Layer | Markdown report, CSV insight output, Power BI LLM Insight Box |
-| Risk Control | Human-in-the-loop review status |
-
----
+```text
+llm_agent/outputs/segment_insights.md
+llm_agent/outputs/powerbi_llm_insights.csv
+```
 
 ## Repository Structure
 
 ```text
 AI-assisted-Customer-Segmentation-Dashboard/
-│
-├── data/
-│   ├── processed/
-│   │   ├── customer_segments.csv
-│   │   └── cross_dimensional_insights.csv
-│   └── dictionary/
-│       └── data_dictionary.md
-│
-├── sql/
-│   ├── 01_data_cleaning.sql
-│   ├── 02_rfm_metric_calculation.sql
-│   ├── 03_customer_segmentation_rules.sql
-│   └── 04_multidimensional_slice_analysis.sql
-│
-├── powerbi/
-│   ├── AI_Customer_Segmentation_Dashboard.pbix
-│   ├── dax_measures/
-│   │   └── aov_measure.dax
-│   └── screenshots/
-│       └── 02_llm_insight_box.png
-│
-├── llm_agent/
-│   ├── src/
-│   │   ├── insight_generator.py
-│   │   ├── llm_client.py
-│   │   └── load_segment_data.py
-│   └── outputs/
-│       ├── segment_insights.md
-│       └── powerbi_llm_insights.csv
-│
-├── docs/
-├── portfolio/
-├── requirements.txt
-├── .gitignore
-└── README.md
+|-- data/
+|   |-- raw/
+|   |-- processed/
+|   `-- dictionary/
+|-- docs/
+|-- llm_agent/
+|   |-- src/
+|   |-- prompt_templates/
+|   `-- outputs/
+|-- outputs/
+|-- portfolio/
+|-- powerbi/
+|-- sql/
+|-- run_pipeline.py
+|-- run_pipeline.ps1
+|-- requirements.txt
+|-- .env.example
+`-- README.md
 ```
 
----
-
-## AI Workflow
-
-The AI workflow follows a structured decision pipeline:
+## Pipeline Workflow
 
 ```text
-Structured customer segment data
-        ↓
-Python data loading
-        ↓
-Prompt construction
-        ↓
-Mock LLM insight generation
-        ↓
-Markdown and CSV output
-        ↓
-Power BI LLM Insight Box
-        ↓
-Human-in-the-loop review
-```
-
-The current version uses a mock LLM client for local development and demo stability. This avoids exposing API keys while keeping the architecture modular.
-
-In production, the same `call_llm()` interface can be connected to OpenAI, Gemini, Claude, or an enterprise-hosted LLM API.
-
----
-
-## DAX Measure Design
-
-Because the current dataset is aggregated at the user level and does not contain raw order IDs, AOV is calculated as **weighted AOV**:
-
-```DAX
-Total Spending =
-SUM(Fact_User_Behavior[Total_Spending])
-
-Total Purchase Frequency =
-SUM(Fact_User_Behavior[Purchase_Frequency])
-
-Weighted AOV =
-DIVIDE(
-    [Total Spending],
-    [Total Purchase Frequency]
-)
-```
-
-This is more reliable than simply averaging the existing `Average_Order_Value` column.
-
-If raw order-level transaction data becomes available in the future, the AOV measure can be upgraded to:
-
-```DAX
-Total Sales = SUM(Sales[Amount])
-
-Order Count = DISTINCTCOUNT(Sales[OrderID])
-
-AOV = DIVIDE([Total Sales], [Order Count])
-```
-
-This reflects a key data modeling principle: **metrics must be designed according to the granularity of the dataset**.
-
----
-
-## LLM Insight Output
-
-The Python LLM layer generates business-ready outputs such as:
-
-- Executive summary
-- Segment interpretation
-- Priority marketing actions
-- Human-in-the-loop review checklist
-
-Example AI-generated recommendation:
-
-> Churn-risk customers account for 22.0% of users and have historically high AOV above ¥3000. They should be treated as dormant premium customers rather than low-value inactive users. Recommended action: launch a high-priority win-back campaign with electronics upgrade reminders, logistics follow-up, and after-sales recovery.
-
----
-
-## Power BI Integration
-
-AI-generated recommendations are exported as:
-
-```text
-llm_agent/outputs/powerbi_llm_insights.csv
-```
-
-This CSV is loaded back into Power BI and displayed as an **LLM Insight Box**.
-
-Each recommendation includes:
-
-- `insight_title`
-- `insight_text`
-- `review_status`
-
-The `review_status` field is designed to support human-in-the-loop governance. In the current prototype, recommendations are marked as:
-
-```text
-Pending human review
-```
-
----
-
-## Screenshot
-
-![LLM Insight Box](powerbi/screenshots/02_llm_insight_box.png)
-
----
-
----
-
-## One-click Local Pipeline
-
-This project now supports a one-click local pipeline.
-
-Instead of manually preparing processed CSV files or manually converting AI-generated insights into a Power BI-readable format, the user only needs to place the raw dataset under `data/raw/` and run the pipeline script.
-
-### Pipeline Entry Point
-
-```powershell
-.\run_pipeline.ps1
-```
-
-### Pipeline Workflow
-
-```text
-Raw dataset
-data/raw/ecommerce_user_behavior_dataset.csv
-        ↓
-prepare_processed_data.py
-        ↓
-Processed business data
+data/raw/*.csv
+        ->
+Python cleaning and RFM/value scoring
+        ->
 data/processed/customer_segments.csv
-data/processed/cross_dimensional_insights.csv
-        ↓
-insight_generator.py
-        ↓
-AI insight outputs
-llm_agent/outputs/segment_insights.md
-llm_agent/outputs/powerbi_llm_insights.csv
-        ↓
-Power BI Refresh
-        ↓
-Updated LLM Insight Box
+        ->
+Structured summary
+        ->
+Mock LLM or SiliconFlow API
+        ->
+outputs/segment_insights.md
+outputs/powerbi_llm_insights.csv
+outputs/run_metadata.json
 ```
 
-### What the Pipeline Automates
+The LLM does **not** calculate business metrics. Python calculates the RFM fields, weighted AOV, Value Proxy Score, customer segment distribution, and cross-dimensional findings first. The LLM only turns that structured summary into business-language recommendations.
 
-| Step | Before Automation | After Automation |
-|---|---|---|
-| Processed segment data | Manually prepared CSV | Generated by Python |
-| Cross-dimensional insights | Manually written | Generated from raw dataset |
-| AI insight report | Manually triggered | Generated by pipeline |
-| Power BI insight CSV | Manually整理 / copied | Generated automatically |
-| Power BI update | Manual CSV import | Refresh existing data source |
+## Metrics
 
-### Remaining Human-in-the-loop Steps
+V3 calculates:
 
-The pipeline does not remove human responsibility. Human users still need to:
+- **Recency**: `Last_Login_Days_Ago`; lower means more recent activity.
+- **Frequency**: `Purchase_Frequency` aggregated per customer.
+- **Monetary**: `Total_Spending` aggregated per customer.
+- **Weighted AOV**: total spending divided by total purchase frequency.
+- **RFM Score**: recency, frequency, and monetary scores on a 1-5 scale.
+- **Value Proxy Score**: 0-100 percentile score using 45% monetary, 25% frequency, 20% weighted AOV, and 10% recency.
+- **Customer Segment**: High-value, Potential, Churn-risk, Regular Retained, or Other Customers.
 
-1. Provide or update the raw dataset.
-2. Run the local pipeline.
-3. Refresh Power BI.
-4. Review AI-generated recommendations before business execution.
+## Environment Configuration
 
-This design reflects a practical AI solution principle:
+Copy `.env.example` to `.env` and choose one provider.
 
-> Automate repetitive data preparation and insight generation, while keeping business judgment and final decisions under human control.
+### Mock mode
 
-## How to Run Locally
+Use this for local portfolio demos and offline testing:
 
-### 1. Create a virtual environment
+```env
+LLM_PROVIDER=mock
+```
 
-```powershell
+Mock mode does not call any external API.
+
+### SiliconFlow mode
+
+Use this when you want real API-generated business wording:
+
+```env
+LLM_PROVIDER=siliconflow
+SILICONFLOW_API_KEY=your_siliconflow_api_key
+SILICONFLOW_BASE_URL=https://api.siliconflow.cn/v1
+SILICONFLOW_MODEL=Qwen/Qwen2.5-7B-Instruct
+```
+
+Do not commit real API keys. `.env` is ignored by Git.
+
+## How to Run on Windows
+
+From Windows cmd:
+
+```cmd
+cd /d D:\chatgpt\AI-assisted-Customer-Segmentation-Dashboard
 python -m venv .venv
-.venv\Scripts\Activate.ps1
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+.venv\Scripts\python.exe run_pipeline.py
 ```
 
-### 2. Install dependencies
+You can also run the PowerShell helper:
 
-```powershell
-python -m pip install -r requirements.txt
+```cmd
+cd /d D:\chatgpt\AI-assisted-Customer-Segmentation-Dashboard
+powershell -ExecutionPolicy Bypass -File run_pipeline.ps1
 ```
 
-### 3. Generate AI insights
+Optional one-run provider override:
 
-```powershell
-python llm_agent\src\insight_generator.py
+```cmd
+.venv\Scripts\python.exe run_pipeline.py --provider mock
+.venv\Scripts\python.exe run_pipeline.py --provider siliconflow
 ```
 
-The generated report will be saved to:
+## How to Replace Raw Data
+
+1. Put the new e-commerce CSV file under `data/raw/`.
+2. Keep the expected columns, including `User_ID`, `Last_Login_Days_Ago`, `Purchase_Frequency`, `Total_Spending`, and `Product_Category_Preference`.
+3. Run the pipeline again.
+4. Check `outputs/run_metadata.json` and confirm `run_time_utc`, `raw_files`, `raw_row_count`, and `processed_customer_count` changed as expected.
+
+The pipeline reads all `*.csv` files under `data/raw/`. If you want to run on only one dataset, keep only that raw CSV in the folder.
+
+## How to Confirm SiliconFlow Was Used
+
+Open `outputs/run_metadata.json`.
+
+Real SiliconFlow success should look like:
+
+```json
+{
+  "requested_provider": "siliconflow",
+  "provider": "siliconflow",
+  "api_reached": true,
+  "validation_passed": true,
+  "model": "Qwen/Qwen2.5-7B-Instruct",
+  "fallback_used": false,
+  "error": null
+}
+```
+
+If the API key, network, endpoint, or model fails, the pipeline automatically falls back to Mock:
+
+```json
+{
+  "requested_provider": "siliconflow",
+  "provider": "mock",
+  "api_reached": true,
+  "validation_passed": false,
+  "fallback_used": true,
+  "error": "..."
+}
+```
+
+If the API could not be reached at all, `api_reached` is `false`. If the API returned content but the numeric guardrail rejected unsupported business metrics, `api_reached` is `true` and `validation_passed` is `false`. This keeps the BI workflow runnable while making provider status auditable.
+
+## Output Files
+
+### `data/processed/customer_segments.csv`
+
+Contains segment-level output for Power BI:
+
+- segment
+- share
+- customer_count
+- business_role
+- weighted_aov
+- avg_recency_days
+- avg_rfm_score
+- avg_value_proxy_score
+- category_preference
+- key_issue
+- action_priority
+
+### `outputs/segment_insights.md`
+
+Contains:
+
+- Project run time
+- Data source
+- Core customer segment results
+- High-value customer insights
+- Churn-risk customer insights
+- Marketing recommendations
+- Human Review reminder
+- Structured Summary Used By LLM
+
+### `outputs/powerbi_llm_insights.csv`
+
+Contains at least:
+
+- insight_title
+- insight_text
+- segment_name
+- priority
+- review_status
+- generated_at
+
+### `outputs/run_metadata.json`
+
+Contains:
+
+- run_time_utc
+- raw_files
+- raw_row_count
+- processed_customer_count
+- requested_provider
+- provider
+- model
+- api_reached
+- validation_passed
+- fallback_used
+- error
+- output_files
+
+## Human Review Guardrail
+
+AI-generated recommendations are decision-support drafts only. Before any marketing campaign is executed, a human reviewer must verify segment rules, raw data freshness, campaign eligibility, inventory, logistics, compliance, and brand tone.
+
+## Power BI Refresh
+
+After running the pipeline, open:
 
 ```text
-llm_agent/outputs/segment_insights.md
+powerbi/AI_Customer_Segmentation_Dashboard.pbix
 ```
 
-The Power BI-ready insight file is located at:
-
-```text
-llm_agent/outputs/powerbi_llm_insights.csv
-```
-
----
-
-## Risk Control and Human Review
-
-This project does not allow AI to directly execute customer-facing campaigns.
-
-The LLM layer only generates draft recommendations. Before any business action is taken, human reviewers must verify:
-
-- Whether the segment definition is correct
-- Whether the data source is reliable
-- Whether the marketing message is accurate
-- Whether the recommendation matches business reality
-- Whether logistics, after-sales, and inventory capacity can support the campaign
-
-This design reflects a practical enterprise AI principle:
-
-> AI accelerates decision preparation, but humans remain responsible for final business decisions.
-
----
-
-## Business Value
-
-This project demonstrates how AI can improve business decision-making in four ways:
-
-1. Transform static BI dashboards into actionable decision workflows.
-2. Reduce manual reporting workload for business analysts.
-3. Convert customer segmentation results into marketing recommendations.
-4. Add human-in-the-loop governance to reduce AI hallucination and business execution risk.
-
----
-
-## Role Relevance
-
-This project is designed for AI Solutions Intern, AI Pre-sales Intern, Technical Consultant Intern, and Business Intelligence-related roles.
-
-It demonstrates the ability to:
-
-- Understand business pain points
-- Build structured data workflows
-- Design reliable BI metrics
-- Integrate AI into business decision processes
-- Communicate insights in a solution-oriented way
-- Balance AI automation with human review and risk control
+Then click **Home -> Refresh** in Power BI Desktop.

@@ -1,6 +1,6 @@
-﻿segment,share,customer_count,business_role,frequency_range,monetary_range,weighted_aov,category_preference,key_issue,action_priority
-High-value Customers,17.8%,178,Core profit engine,6.87,Avg total spending ¥3756.81,547.23,Apparel,Need loyalty protection and VIP retention,Stabilize
-Potential Customers,29.2%,292,Growth engine,2.02,Avg total spending ¥2661.92,1319.66,Apparel,Large base but low repurchase frequency,Convert
-Churn-risk Customers,18.8%,188,Dormant premium assets,4.76,Avg total spending ¥3866.1,812.1,Home & Kitchen,High historical spending but low recent engagement,Recover
-Regular Retained Customers,25.1%,251,Traffic foundation,6.95,Avg total spending ¥1306.88,187.98,Electronics,Frequent buyers with relatively lower spending,Upsell
-Other Customers,9.1%,91,Long-tail users,1.98,Avg total spending ¥572.65,289.51,Books,Low engagement and limited short-term value,Nurture
+﻿segment,share,share_pct,customer_count,business_role,frequency_range,monetary_range,weighted_aov,avg_recency_days,avg_rfm_score,avg_value_proxy_score,avg_recency_score,avg_frequency_score,avg_monetary_score,category_preference,key_issue,action_priority
+High-value Customers,12.2%,12.2,122,Core profit engine,7.4,Avg total spending CNY 3876.4,523.72,9.05,13.02,72.84,4.24,4.43,4.34,Apparel,Need loyalty protection and VIP retention,Stabilize
+Potential Customers,29.2%,29.2,292,Growth engine,2.02,Avg total spending CNY 2661.92,1319.66,12.62,8.47,48.19,3.53,1.79,3.15,Apparel,Large base but low repurchase frequency,Convert
+Churn-risk Customers,18.8%,18.8,188,Dormant premium assets,4.76,Avg total spending CNY 3866.1,812.1,24.67,8.8,61.97,1.39,3.14,4.28,Home & Kitchen,High historical spending but low recent engagement,Recover
+Regular Retained Customers,30.7%,30.7,307,Traffic foundation,6.72,Avg total spending CNY 1706.25,253.79,15.75,9.16,43.94,2.97,4.05,2.14,Electronics,Frequent buyers with relatively lower spending,Upsell
+Other Customers,9.1%,9.1,91,Long-tail users,1.98,Avg total spending CNY 572.65,289.51,14.54,6.02,21.32,3.24,1.78,1.0,Books,Low engagement and limited short-term value,Nurture
