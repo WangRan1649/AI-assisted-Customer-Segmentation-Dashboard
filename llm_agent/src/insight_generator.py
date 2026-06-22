@@ -120,7 +120,8 @@ def build_markdown_report(structured_summary: dict[str, Any], llm_response: LLMR
         f"Requested provider: {llm_response.requested_provider}; actual provider: "
         f"{llm_response.provider}; model: {llm_response.model}; api reached: "
         f"{llm_response.api_reached}; validation passed: {llm_response.validation_passed}; "
-        f"fallback used: {llm_response.fallback_used}."
+        f"fallback used: {llm_response.fallback_used}; retry count: "
+        f"{llm_response.retry_count}; error type: {llm_response.error_type}."
     )
     if llm_response.error:
         provider_note += f" Error: {llm_response.error}"
@@ -284,6 +285,8 @@ def main() -> None:
     print(f"API reached: {result.llm_response.api_reached}")
     print(f"Validation passed: {result.llm_response.validation_passed}")
     print(f"Fallback used: {result.llm_response.fallback_used}")
+    print(f"Retry count: {result.llm_response.retry_count}")
+    print(f"Error type: {result.llm_response.error_type}")
     print(f"Saved: {OUTPUT_MD}")
     print(f"Saved: {OUTPUT_CSV}")
 

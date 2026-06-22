@@ -24,6 +24,7 @@ processed_customer_count = 1000
 
 - 从 `data/raw/` 自动读取原始电商 CSV 数据。
 - 清洗 raw data，并重新生成 `data/processed/customer_segments.csv`。
+- 生成 `data/processed/fact_user_behavior_scored.csv`，作为 Power BI 主图表推荐读取的用户级评分明细表。
 - 使用 Python 计算 RFM、Weighted AOV、Value Proxy Score、客户分群和跨维度洞察。
 - 在调用 LLM 前，先由 Python 生成 structured summary，确保业务数字有来源。
 - 支持 SiliconFlow API 模式，用真实大模型生成业务表达和营销建议。
@@ -106,7 +107,10 @@ data/raw/*.csv
         ->
 Python 数据清洗与 RFM/value scoring
         ->
+data/processed/fact_user_behavior_scored.csv
 data/processed/customer_segments.csv
+        ->
+BI 主图表和 AI 洞察使用一致的分群人数
         ->
 Structured summary
         ->
@@ -119,6 +123,7 @@ outputs/run_metadata.json
 
 生成文件包括：
 
+- `data/processed/fact_user_behavior_scored.csv`
 - `data/processed/customer_segments.csv`
 - `outputs/segment_insights.md`
 - `outputs/powerbi_llm_insights.csv`
@@ -220,6 +225,8 @@ processed_customer_count = 1000
 
 ## AI 洞察输出
 
+`data/processed/fact_user_behavior_scored.csv` 是 Power BI 主图表推荐读取的 fact 表。它每个用户一行，包含原始用户字段、RFM 分数、Weighted AOV、Value Proxy Score、英文分群名、中文分群名、业务角色和行动优先级。
+
 `outputs/segment_insights.md` 包含：
 
 - 项目运行时间
@@ -253,11 +260,20 @@ processed_customer_count = 1000
 - `validation_passed`
 - `fallback_used`
 - `error`
+- `retry_count`
+- `error_type`
 - `output_files`
 
 ## Power BI 联动
 
-Power BI 会读取 Pipeline 重新生成的 CSV 输出，用于刷新 Dashboard 和 LLM Insight Box。
+Power BI 应读取同一次 V3 Pipeline 重新生成的 CSV 输出：
+
+- 主图表建议读取 `data/processed/fact_user_behavior_scored.csv`。
+- AI Insight Box 继续读取 `outputs/powerbi_llm_insights.csv`。
+
+这样可以保证饼图、柱状图、客户数和 AI 洞察文本使用同一套 pipeline 分群结果。
+
+如果 Power BI 图表和 AI Insight Box 的分群人数不一致，通常说明 Power BI 主图表仍在读取旧表，例如 `Fact_User_Behavior`，或仍在使用旧分群字段。请将主图表数据源切换到 `data/processed/fact_user_behavior_scored.csv`，并使用其中的 `segment_name` 或 `segment_name_cn` 字段。
 
 运行 Pipeline 后，打开：
 

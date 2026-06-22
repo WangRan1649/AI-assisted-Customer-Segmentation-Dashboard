@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import os
 import re
+import socket
+import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
@@ -21,6 +23,9 @@ DEFAULT_PROVIDER = "mock"
 DEFAULT_SILICONFLOW_BASE_URL = "https://api.siliconflow.cn/v1"
 DEFAULT_SILICONFLOW_MODEL = "Qwen/Qwen2.5-7B-Instruct"
 MOCK_MODEL = "local-structured-mock-v3"
+SILICONFLOW_TIMEOUT_SECONDS = 90
+SILICONFLOW_MAX_READ_TIMEOUT_RETRIES = 2
+SILICONFLOW_RETRY_SLEEP_SECONDS = 2
 
 NUMBER_PATTERN = re.compile(
     r"(?<![A-Za-z0-9_])(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?%?(?![A-Za-z0-9_])"
@@ -83,12 +88,22 @@ class LLMResponse:
     validation_passed: bool
     fallback_used: bool
     error: str | None
+    retry_count: int
+    error_type: str | None
 
 
 class LLMProviderError(RuntimeError):
-    def __init__(self, message: str, api_reached: bool) -> None:
+    def __init__(
+        self,
+        message: str,
+        api_reached: bool,
+        error_type: str,
+        retry_count: int = 0,
+    ) -> None:
         super().__init__(message)
         self.api_reached = api_reached
+        self.error_type = error_type
+        self.retry_count = retry_count
 
 
 def load_environment() -> None:
@@ -115,12 +130,34 @@ def get_siliconflow_config() -> tuple[str, str, str]:
     model = (os.getenv("SILICONFLOW_MODEL") or DEFAULT_SILICONFLOW_MODEL).strip()
 
     if not api_key:
-        raise LLMProviderError("SILICONFLOW_API_KEY is not set.", api_reached=False)
+        raise LLMProviderError(
+            "SILICONFLOW_API_KEY is not set.",
+            api_reached=False,
+            error_type="config_error",
+        )
 
     return api_key, base_url, model
 
 
-def call_siliconflow(prompt: str) -> tuple[str, str]:
+def is_timeout_error(exc: BaseException) -> bool:
+    if isinstance(exc, (TimeoutError, socket.timeout)):
+        return True
+
+    if isinstance(exc, urllib.error.URLError):
+        reason = exc.reason
+        if isinstance(reason, (TimeoutError, socket.timeout)):
+            return True
+        return "timed out" in str(reason).lower()
+
+    return "timed out" in str(exc).lower()
+
+
+def call_siliconflow_once(request: urllib.request.Request) -> str:
+    with urllib.request.urlopen(request, timeout=SILICONFLOW_TIMEOUT_SECONDS) as response:
+        return response.read().decode("utf-8")
+
+
+def call_siliconflow(prompt: str) -> tuple[str, str, int]:
     api_key, base_url, model = get_siliconflow_config()
     url = f"{base_url}/chat/completions"
 
@@ -155,33 +192,82 @@ def call_siliconflow(prompt: str) -> tuple[str, str]:
         method="POST",
     )
 
-    try:
-        with urllib.request.urlopen(request, timeout=60) as response:
-            response_body = response.read().decode("utf-8")
-    except urllib.error.HTTPError as exc:
-        detail = exc.read().decode("utf-8", errors="replace")
-        raise LLMProviderError(f"SiliconFlow HTTP {exc.code}: {detail}", api_reached=True) from exc
-    except urllib.error.URLError as exc:
-        raise LLMProviderError(f"SiliconFlow connection error: {exc.reason}", api_reached=False) from exc
+    response_body = ""
+    retry_count = 0
+
+    for attempt in range(SILICONFLOW_MAX_READ_TIMEOUT_RETRIES + 1):
+        try:
+            response_body = call_siliconflow_once(request)
+            retry_count = attempt
+            break
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")
+            raise LLMProviderError(
+                f"SiliconFlow HTTP {exc.code}: {detail}",
+                api_reached=True,
+                error_type="http_error",
+                retry_count=attempt,
+            ) from exc
+        except urllib.error.URLError as exc:
+            if is_timeout_error(exc) and attempt < SILICONFLOW_MAX_READ_TIMEOUT_RETRIES:
+                time.sleep(SILICONFLOW_RETRY_SLEEP_SECONDS)
+                continue
+
+            raise LLMProviderError(
+                f"SiliconFlow connection error: {exc.reason}",
+                api_reached=False,
+                error_type="timeout" if is_timeout_error(exc) else "connection_error",
+                retry_count=attempt,
+            ) from exc
+        except (TimeoutError, socket.timeout) as exc:
+            if attempt < SILICONFLOW_MAX_READ_TIMEOUT_RETRIES:
+                time.sleep(SILICONFLOW_RETRY_SLEEP_SECONDS)
+                continue
+
+            raise LLMProviderError(
+                f"SiliconFlow read timeout after {SILICONFLOW_TIMEOUT_SECONDS} seconds.",
+                api_reached=False,
+                error_type="timeout",
+                retry_count=attempt,
+            ) from exc
+    else:
+        raise LLMProviderError(
+            "SiliconFlow request failed before receiving a response.",
+            api_reached=False,
+            error_type="connection_error",
+            retry_count=SILICONFLOW_MAX_READ_TIMEOUT_RETRIES,
+        )
 
     try:
         data = json.loads(response_body)
     except json.JSONDecodeError as exc:
-        raise LLMProviderError("SiliconFlow response was not valid JSON.", api_reached=True) from exc
+        raise LLMProviderError(
+            "SiliconFlow response was not valid JSON.",
+            api_reached=True,
+            error_type="response_error",
+            retry_count=retry_count,
+        ) from exc
 
     choices = data.get("choices") or []
     if not choices:
         raise LLMProviderError(
             f"SiliconFlow response did not include choices: {response_body[:500]}",
             api_reached=True,
+            error_type="response_error",
+            retry_count=retry_count,
         )
 
     message = choices[0].get("message") or {}
     content = (message.get("content") or "").strip()
     if not content:
-        raise LLMProviderError("SiliconFlow response content was empty.", api_reached=True)
+        raise LLMProviderError(
+            "SiliconFlow response content was empty.",
+            api_reached=True,
+            error_type="response_error",
+            retry_count=retry_count,
+        )
 
-    return content, model
+    return content, model, retry_count
 
 
 def parse_number(token: str) -> float:
@@ -358,12 +444,15 @@ def call_llm(
             validation_passed=True,
             fallback_used=False,
             error=None,
+            retry_count=0,
+            error_type=None,
         )
 
     if requested_provider == "siliconflow":
         api_reached = False
+        retry_count = 0
         try:
-            text, model = call_siliconflow(prompt)
+            text, model, retry_count = call_siliconflow(prompt)
             api_reached = True
 
             unsupported_numbers = unsupported_numeric_tokens(text, structured_summary)
@@ -373,6 +462,8 @@ def call_llm(
                     + ", ".join(str(value) for value in unsupported_numbers[:10])
                     + ". Non-business numbering is allowed, but business metrics must come from the structured summary.",
                     api_reached=True,
+                    error_type="validation_error",
+                    retry_count=retry_count,
                 )
 
             return LLMResponse(
@@ -384,6 +475,8 @@ def call_llm(
                 validation_passed=True,
                 fallback_used=False,
                 error=None,
+                retry_count=retry_count,
+                error_type=None,
             )
         except LLMProviderError as exc:
             api_reached = api_reached or exc.api_reached
@@ -396,6 +489,8 @@ def call_llm(
                 validation_passed=False,
                 fallback_used=True,
                 error=str(exc),
+                retry_count=exc.retry_count,
+                error_type=exc.error_type,
             )
         except Exception as exc:
             return LLMResponse(
@@ -407,6 +502,8 @@ def call_llm(
                 validation_passed=False,
                 fallback_used=True,
                 error=str(exc),
+                retry_count=retry_count,
+                error_type="timeout" if is_timeout_error(exc) else "unknown_error",
             )
 
     return LLMResponse(
@@ -418,4 +515,6 @@ def call_llm(
         validation_passed=False,
         fallback_used=True,
         error=f"Unsupported LLM_PROVIDER: {requested_provider}",
+        retry_count=0,
+        error_type="unsupported_provider",
     )

@@ -14,6 +14,7 @@ PROCESSED_DIR = ROOT_DIR / "data" / "processed"
 
 CUSTOMER_SEGMENTS_FILE = PROCESSED_DIR / "customer_segments.csv"
 CROSS_INSIGHTS_FILE = PROCESSED_DIR / "cross_dimensional_insights.csv"
+FACT_USER_BEHAVIOR_SCORED_FILE = PROCESSED_DIR / "fact_user_behavior_scored.csv"
 
 REQUIRED_COLUMNS = [
     "User_ID",
@@ -58,6 +59,38 @@ SEGMENT_ORDER = [
     "Other Customers",
 ]
 
+SEGMENT_CN_MAPPING = {
+    "High-value Customers": "高价值用户",
+    "Potential Customers": "潜力用户",
+    "Churn-risk Customers": "流失风险用户",
+    "Regular Retained Customers": "一般保持用户",
+    "Other Customers": "其他用户",
+}
+
+ROLE_MAPPING = {
+    "High-value Customers": "Core profit engine",
+    "Potential Customers": "Growth engine",
+    "Churn-risk Customers": "Dormant premium assets",
+    "Regular Retained Customers": "Traffic foundation",
+    "Other Customers": "Long-tail users",
+}
+
+ISSUE_MAPPING = {
+    "High-value Customers": "Need loyalty protection and VIP retention",
+    "Potential Customers": "Large base but low repurchase frequency",
+    "Churn-risk Customers": "High historical spending but low recent engagement",
+    "Regular Retained Customers": "Frequent buyers with relatively lower spending",
+    "Other Customers": "Low engagement and limited short-term value",
+}
+
+PRIORITY_MAPPING = {
+    "High-value Customers": "Stabilize",
+    "Potential Customers": "Convert",
+    "Churn-risk Customers": "Recover",
+    "Regular Retained Customers": "Upsell",
+    "Other Customers": "Nurture",
+}
+
 
 @dataclass(frozen=True)
 class RawFileStat:
@@ -82,6 +115,7 @@ class ProcessedDataResult:
     cleaned_row_count: int
     processed_customer_count: int
     customer_level_data: pd.DataFrame
+    fact_user_behavior_scored: pd.DataFrame
     customer_segments: pd.DataFrame
     cross_dimensional_insights: pd.DataFrame
     output_files: dict[str, Path]
@@ -235,6 +269,7 @@ def build_customer_level_data(df: pd.DataFrame) -> pd.DataFrame:
             interests=("Interests", most_common),
             recency_days=("Last_Login_Days_Ago", "min"),
             frequency=("Purchase_Frequency", "sum"),
+            average_order_value=("Average_Order_Value", "mean"),
             monetary=("Total_Spending", "sum"),
             category_preference=("Product_Category_Preference", most_common),
             time_spent_minutes=("Time_Spent_on_Site_Minutes", "sum"),
@@ -333,33 +368,9 @@ def summarize_segments(customer_df: pd.DataFrame) -> pd.DataFrame:
         axis=1,
     ).round(2)
 
-    role_mapping = {
-        "High-value Customers": "Core profit engine",
-        "Potential Customers": "Growth engine",
-        "Churn-risk Customers": "Dormant premium assets",
-        "Regular Retained Customers": "Traffic foundation",
-        "Other Customers": "Long-tail users",
-    }
-
-    issue_mapping = {
-        "High-value Customers": "Need loyalty protection and VIP retention",
-        "Potential Customers": "Large base but low repurchase frequency",
-        "Churn-risk Customers": "High historical spending but low recent engagement",
-        "Regular Retained Customers": "Frequent buyers with relatively lower spending",
-        "Other Customers": "Low engagement and limited short-term value",
-    }
-
-    priority_mapping = {
-        "High-value Customers": "Stabilize",
-        "Potential Customers": "Convert",
-        "Churn-risk Customers": "Recover",
-        "Regular Retained Customers": "Upsell",
-        "Other Customers": "Nurture",
-    }
-
-    segment_summary["business_role"] = segment_summary["customer_segment"].map(role_mapping)
-    segment_summary["key_issue"] = segment_summary["customer_segment"].map(issue_mapping)
-    segment_summary["action_priority"] = segment_summary["customer_segment"].map(priority_mapping)
+    segment_summary["business_role"] = segment_summary["customer_segment"].map(ROLE_MAPPING)
+    segment_summary["key_issue"] = segment_summary["customer_segment"].map(ISSUE_MAPPING)
+    segment_summary["action_priority"] = segment_summary["customer_segment"].map(PRIORITY_MAPPING)
 
     segment_summary["frequency_range"] = segment_summary["avg_frequency"].round(2).astype(str)
     segment_summary["monetary_range"] = (
@@ -403,6 +414,78 @@ def summarize_segments(customer_df: pd.DataFrame) -> pd.DataFrame:
     output[rounded_columns] = output[rounded_columns].round(2)
 
     return output
+
+
+def build_fact_user_behavior_scored(customer_df: pd.DataFrame) -> pd.DataFrame:
+    """Build the Power BI fact table used by main visuals and segment counts."""
+
+    fact = customer_df.copy()
+    fact["segment_name"] = fact["customer_segment"]
+    fact["segment_name_cn"] = fact["segment_name"].map(SEGMENT_CN_MAPPING)
+    fact["business_role"] = fact["segment_name"].map(ROLE_MAPPING)
+    fact["action_priority"] = fact["segment_name"].map(PRIORITY_MAPPING)
+
+    fact = fact.rename(
+        columns={
+            "age": "Age",
+            "gender": "Gender",
+            "location": "Location",
+            "income": "Income",
+            "interests": "Interests",
+            "recency_days": "Last_Login_Days_Ago",
+            "frequency": "Purchase_Frequency",
+            "average_order_value": "Average_Order_Value",
+            "monetary": "Total_Spending",
+            "category_preference": "Product_Category_Preference",
+            "time_spent_minutes": "Time_Spent_on_Site_Minutes",
+            "pages_viewed": "Pages_Viewed",
+            "newsletter_subscription": "Newsletter_Subscription",
+            "recency_score": "r_score",
+            "frequency_score": "f_score",
+            "monetary_score": "m_score",
+        }
+    )
+
+    output_columns = [
+        "User_ID",
+        "Age",
+        "Gender",
+        "Location",
+        "Income",
+        "Interests",
+        "Last_Login_Days_Ago",
+        "Purchase_Frequency",
+        "Average_Order_Value",
+        "Total_Spending",
+        "Product_Category_Preference",
+        "Time_Spent_on_Site_Minutes",
+        "Pages_Viewed",
+        "Newsletter_Subscription",
+        "weighted_aov",
+        "r_score",
+        "f_score",
+        "m_score",
+        "rfm_score",
+        "value_proxy_score",
+        "segment_name",
+        "segment_name_cn",
+        "business_role",
+        "action_priority",
+    ]
+
+    fact = fact[output_columns].copy()
+    rounded_columns = [
+        "Age",
+        "Income",
+        "Average_Order_Value",
+        "Total_Spending",
+        "weighted_aov",
+        "value_proxy_score",
+    ]
+    fact[rounded_columns] = fact[rounded_columns].round(2)
+    fact["rfm_score"] = fact["rfm_score"].astype(int)
+
+    return fact
 
 
 def filtered_or_full(df: pd.DataFrame, minimum_count: int) -> pd.DataFrame:
@@ -573,10 +656,12 @@ def build_structured_summary(
 def run_processing(raw_dir: Path = RAW_DIR) -> ProcessedDataResult:
     raw_df, stats = load_raw_data(raw_dir)
     customer_level_data = build_customer_level_data(raw_df)
+    fact_user_behavior_scored = build_fact_user_behavior_scored(customer_level_data)
     customer_segments = summarize_segments(customer_level_data)
     cross_dimensional_insights = build_cross_dimensional_insights(customer_level_data)
 
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+    fact_user_behavior_scored.to_csv(FACT_USER_BEHAVIOR_SCORED_FILE, index=False, encoding="utf-8-sig")
     customer_segments.to_csv(CUSTOMER_SEGMENTS_FILE, index=False, encoding="utf-8-sig")
     cross_dimensional_insights.to_csv(CROSS_INSIGHTS_FILE, index=False, encoding="utf-8-sig")
 
@@ -586,9 +671,11 @@ def run_processing(raw_dir: Path = RAW_DIR) -> ProcessedDataResult:
         cleaned_row_count=sum(stat.cleaned_row_count for stat in stats),
         processed_customer_count=customer_level_data["User_ID"].nunique(),
         customer_level_data=customer_level_data,
+        fact_user_behavior_scored=fact_user_behavior_scored,
         customer_segments=customer_segments,
         cross_dimensional_insights=cross_dimensional_insights,
         output_files={
+            "fact_user_behavior_scored": FACT_USER_BEHAVIOR_SCORED_FILE,
             "customer_segments": CUSTOMER_SEGMENTS_FILE,
             "cross_dimensional_insights": CROSS_INSIGHTS_FILE,
         },
@@ -601,6 +688,7 @@ def main() -> None:
     print(f"Raw rows read: {processed.raw_row_count}")
     print(f"Cleaned rows used: {processed.cleaned_row_count}")
     print(f"Processed customers: {processed.processed_customer_count}")
+    print(f"Saved: {FACT_USER_BEHAVIOR_SCORED_FILE}")
     print(f"Saved: {CUSTOMER_SEGMENTS_FILE}")
     print(f"Saved: {CROSS_INSIGHTS_FILE}")
 

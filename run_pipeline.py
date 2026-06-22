@@ -52,6 +52,8 @@ def build_metadata(
         "validation_passed": llm_response.validation_passed,
         "fallback_used": llm_response.fallback_used,
         "error": llm_response.error,
+        "retry_count": llm_response.retry_count,
+        "error_type": llm_response.error_type,
         "output_files": output_files,
     }
 
@@ -101,10 +103,13 @@ def main() -> None:
     print(f"API reached: {metadata['api_reached']}")
     print(f"Validation passed: {metadata['validation_passed']}")
     print(f"Fallback used: {metadata['fallback_used']}")
+    print(f"Retry count: {metadata['retry_count']}")
+    print(f"Error type: {metadata['error_type']}")
     if metadata["error"]:
         print(f"Provider error: {metadata['error']}")
     print("")
     print("Generated V3 files:")
+    print(f"- {relative_path(processed.output_files['fact_user_behavior_scored'])}")
     print(f"- {relative_path(processed.output_files['customer_segments'])}")
     print(f"- {relative_path(insight_result.output_files['segment_insights'])}")
     print(f"- {relative_path(insight_result.output_files['powerbi_llm_insights'])}")

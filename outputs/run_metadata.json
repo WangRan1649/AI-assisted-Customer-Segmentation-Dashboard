@@ -1,5 +1,5 @@
 {
-  "run_time_utc": "2026-06-22T03:23:25Z",
+  "run_time_utc": "2026-06-22T07:30:37Z",
   "raw_files": [
     {
       "path": "data/raw/ecommerce_user_behavior_dataset.csv",
@@ -18,7 +18,10 @@
   "validation_passed": true,
   "fallback_used": false,
   "error": null,
+  "retry_count": 1,
+  "error_type": null,
   "output_files": {
+    "fact_user_behavior_scored": "data/processed/fact_user_behavior_scored.csv",
     "customer_segments": "data/processed/customer_segments.csv",
     "cross_dimensional_insights": "data/processed/cross_dimensional_insights.csv",
     "segment_insights": "outputs/segment_insights.md",

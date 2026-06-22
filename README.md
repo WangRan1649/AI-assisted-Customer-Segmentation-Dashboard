@@ -24,6 +24,7 @@ processed_customer_count = 1000
 
 - Reads raw e-commerce CSV files from `data/raw/`.
 - Cleans raw data and regenerates `data/processed/customer_segments.csv`.
+- Generates `data/processed/fact_user_behavior_scored.csv` as the user-level scored fact table for Power BI main visuals.
 - Calculates RFM metrics, weighted AOV, Value Proxy Score, customer segments, and cross-dimensional insights in Python.
 - Builds a structured summary from Python-computed results before calling the LLM.
 - Supports SiliconFlow API mode for real LLM-generated business wording.
@@ -106,7 +107,10 @@ data/raw/*.csv
         ->
 Python cleaning and RFM/value scoring
         ->
+data/processed/fact_user_behavior_scored.csv
 data/processed/customer_segments.csv
+        ->
+Consistent segment counts for BI visuals and AI insights
         ->
 Structured summary
         ->
@@ -119,6 +123,7 @@ outputs/run_metadata.json
 
 Generated files:
 
+- `data/processed/fact_user_behavior_scored.csv`
 - `data/processed/customer_segments.csv`
 - `outputs/segment_insights.md`
 - `outputs/powerbi_llm_insights.csv`
@@ -218,6 +223,8 @@ If `provider` is `mock` while `requested_provider` is `siliconflow`, the system 
 
 ## AI Insight Outputs
 
+`data/processed/fact_user_behavior_scored.csv` is the recommended fact table for Power BI main visuals. It contains one row per user with original user fields, RFM scores, weighted AOV, Value Proxy Score, English segment name, Chinese segment name, business role, and action priority.
+
 `outputs/segment_insights.md` contains:
 
 - Project run time
@@ -251,11 +258,20 @@ If `provider` is `mock` while `requested_provider` is `siliconflow`, the system 
 - `validation_passed`
 - `fallback_used`
 - `error`
+- `retry_count`
+- `error_type`
 - `output_files`
 
 ## Power BI Integration
 
-Power BI reads the regenerated CSV outputs to refresh the dashboard and LLM insight box.
+Power BI should use the regenerated CSV outputs from the same V3 pipeline:
+
+- Main BI visuals should read `data/processed/fact_user_behavior_scored.csv`.
+- The AI Insight Box should read `outputs/powerbi_llm_insights.csv`.
+
+This keeps the pie charts, bar charts, customer counts, and AI insight text aligned with the same segment logic from one pipeline run.
+
+If Power BI visuals and the AI Insight Box show different segment counts, the usual cause is that the main Power BI visuals are still connected to an old table, such as `Fact_User_Behavior`, or to an old segment field. Repoint those visuals to `data/processed/fact_user_behavior_scored.csv` and use `segment_name` or `segment_name_cn` from that file.
 
 After running the pipeline, open:
 
