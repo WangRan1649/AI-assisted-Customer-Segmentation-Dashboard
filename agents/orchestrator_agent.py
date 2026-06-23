@@ -193,6 +193,16 @@ def _apply_step_outputs(plan: AgentPlan, output: dict[str, Any]) -> list[AgentSt
     return steps
 
 
+def _attach_trace_if_enabled(
+    request: AgentRequest,
+    plan: AgentPlan,
+    result: AgentResult,
+) -> AgentResult:
+    if request.trace_enabled:
+        result.trace_path = log_agent_run(plan, result)
+    return result
+
+
 def run_agent_request(request: AgentRequest) -> AgentResult:
     plan = route_request(request)
 
@@ -209,8 +219,7 @@ def run_agent_request(request: AgentRequest) -> AgentResult:
             error=plan.refusal_reason,
             steps=plan.steps,
         )
-        result.trace_path = log_agent_run(plan, result)
-        return result
+        return _attach_trace_if_enabled(request, plan, result)
 
     try:
         if plan.intent == "list_demo_cases":
@@ -255,5 +264,4 @@ def run_agent_request(request: AgentRequest) -> AgentResult:
             steps=plan.steps,
         )
 
-    result.trace_path = log_agent_run(plan, result)
-    return result
+    return _attach_trace_if_enabled(request, plan, result)

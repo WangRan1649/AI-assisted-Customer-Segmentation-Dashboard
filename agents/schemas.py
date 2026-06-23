@@ -9,6 +9,7 @@ class AgentRequest:
     question: str
     dry_run: bool = True
     provider: str = "mock"
+    trace_enabled: bool = True
 
 
 @dataclass

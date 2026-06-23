@@ -344,6 +344,24 @@ It demonstrates:
 - Human-in-the-loop AI governance.
 - Clear communication of business value and technical implementation.
 
+## V3.4 Eval Harness
+
+V3.4 adds a lightweight evaluation harness for the Router Agent and Orchestrator. It tests intent routing, tool selection, risk classification, dry-run safety, high-risk refusal behavior, and whether answers contain required business keywords.
+
+The eval is deterministic and local. It does not call SiliconFlow, does not switch raw data, does not run the pipeline, and does not modify Power BI files.
+
+Run:
+
+```cmd
+.venv\Scripts\python.exe eval\run_eval.py
+```
+
+Results are written to:
+
+```text
+eval/eval_results.csv
+```
+
 ## Future Work
 
 The following items are future directions, not completed V3 features:
