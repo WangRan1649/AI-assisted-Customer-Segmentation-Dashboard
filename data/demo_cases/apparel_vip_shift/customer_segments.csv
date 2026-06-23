@@ -1,0 +1,6 @@
+﻿segment,share,share_pct,customer_count,business_role,frequency_range,monetary_range,weighted_aov,avg_recency_days,avg_rfm_score,avg_value_proxy_score,avg_recency_score,avg_frequency_score,avg_monetary_score,category_preference,key_issue,action_priority
+High-value Customers,32.0%,32.0,320,Core profit engine,12.13,Avg total spending CNY 21723.91,1790.28,2.95,13.8,81.18,4.65,4.52,4.62,Apparel,Need loyalty protection and VIP retention,Stabilize
+Potential Customers,24.0%,24.0,240,Growth engine,2.02,Avg total spending CNY 3221.3,1597.34,7.9,7.01,36.63,3.48,1.65,1.88,Electronics,Large base but low repurchase frequency,Convert
+Churn-risk Customers,27.0%,27.0,270,Dormant premium assets,8.5,Avg total spending CNY 10232.79,1203.86,94.84,7.86,46.7,1.31,3.33,3.22,Home & Kitchen,High historical spending but low recent engagement,Recover
+Regular Retained Customers,1.0%,1.0,10,Traffic foundation,9.0,Avg total spending CNY 14491.1,1610.12,4.2,10.9,64.29,4.1,3.0,3.8,Apparel,Frequent buyers with relatively lower spending,Upsell
+Other Customers,16.0%,16.0,160,Long-tail users,1.55,Avg total spending CNY 257.86,166.36,52.53,4.63,12.64,2.08,1.55,1.0,Books,Low engagement and limited short-term value,Nurture
