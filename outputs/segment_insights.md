@@ -1,16 +1,16 @@
-# AI-assisted BI Decision Workflow - Segment Insights
+# AI 辅助 BI 决策工作流 - 客户分群洞察
 
-## Project Run Time
-- UTC: 2026-06-23T01:05:47Z
-- Requested provider: mock; actual provider: mock; model: local-structured-mock-v3; api reached: False; validation passed: True; fallback used: False; retry count: 0; error type: None.
+## 项目运行时间
+- UTC: 2026-06-23T02:34:51Z
+- requested_provider: mock; provider: mock; model: local-structured-mock-v3; api_reached: False; validation_passed: True; fallback_used: False; retry_count: 0; error_type: None.
 
-## Data Source
-- data/raw/ecommerce_user_behavior_dataset.csv (raw rows: 1001, cleaned rows: 1000, encoding: gbk)
-- Raw row count: 1001
-- Cleaned row count: 1000
-- Processed customer count: 1000
+## 数据来源
+- data/raw/ecommerce_user_behavior_dataset.csv（raw rows: 1001，cleaned rows: 1000，encoding: gbk）
+- raw_row_count: 1001
+- cleaned_row_count: 1000
+- processed_customer_count: 1000
 
-## Core Customer Segment Results
+## 核心客户分群结果
 | segment | customer_count | share | weighted_aov | avg_rfm_score | avg_value_proxy_score | category_preference | action_priority |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | High-value Customers | 122 | 12.2% | 523.72 | 13.02 | 72.84 | Apparel | Stabilize |
@@ -19,58 +19,58 @@
 | Regular Retained Customers | 307 | 30.7% | 253.79 | 9.16 | 43.94 | Electronics | Upsell |
 | Other Customers | 91 | 9.1% | 289.51 | 6.02 | 21.32 | Books | Nurture |
 
-## High-value Customer Insights
-High-value Customers contains 122 customers (12.2%). Weighted AOV is 523.72, average RFM score is 13.02, and average Value Proxy Score is 72.84. Key issue: Need loyalty protection and VIP retention.
+## 高价值客户洞察
+High-value Customers（高价值用户）包含 122 个用户，占比 12.2%。Weighted AOV 为 523.72，Avg RFM Score 为 13.02，Avg Value Proxy Score 为 72.84。核心问题：需要重点做忠诚度保护和 VIP 留存。
 
-Female customers around age 51 show the highest weighted AOV (1001.62) among sufficiently sized groups.
+女性客户中约 51 岁客群的 Weighted AOV 为 1001.62，应作为高客单重点观察人群。
 
-## Churn-risk Customer Insights
-Churn-risk Customers contains 188 customers (18.8%). Weighted AOV is 812.1, average RFM score is 8.8, and average Value Proxy Score is 61.97. Key issue: High historical spending but low recent engagement.
+## 流失风险客户洞察
+Churn-risk Customers（流失风险用户）包含 188 个用户，占比 18.8%。Weighted AOV 为 812.1，Avg RFM Score 为 8.8，Avg Value Proxy Score 为 61.97。核心问题：历史消费较高，但近期互动不足。
 
-Recommended action source: Build win-back campaigns with product upgrade reminders, after-sales recovery, and service follow-up.
+建议来源：使用产品升级提醒、售后关怀和服务跟进进行召回。
 
-## Marketing Recommendations
-## LLM Draft Business Interpretation
+## 营销建议
+## LLM 中文业务解读草稿
 
-### Core Customer Segment Results
-- High-value Customers: 122 customers (12.2%), weighted AOV 523.72, average RFM 13.02, value proxy score 72.84. Role: Core profit engine.
-- Potential Customers: 292 customers (29.2%), weighted AOV 1319.66, average RFM 8.47, value proxy score 48.19. Role: Growth engine.
-- Churn-risk Customers: 188 customers (18.8%), weighted AOV 812.1, average RFM 8.8, value proxy score 61.97. Role: Dormant premium assets.
-- Regular Retained Customers: 307 customers (30.7%), weighted AOV 253.79, average RFM 9.16, value proxy score 43.94. Role: Traffic foundation.
-- Other Customers: 91 customers (9.1%), weighted AOV 289.51, average RFM 6.02, value proxy score 21.32. Role: Long-tail users.
+### 核心客户分群结果
+- High-value Customers：122 个用户，占比 12.2%，Weighted AOV 为 523.72，Avg RFM Score 为 13.02，Value Proxy Score 为 72.84。业务角色：核心利润来源。
+- Potential Customers：292 个用户，占比 29.2%，Weighted AOV 为 1319.66，Avg RFM Score 为 8.47，Value Proxy Score 为 48.19。业务角色：增长转化池。
+- Churn-risk Customers：188 个用户，占比 18.8%，Weighted AOV 为 812.1，Avg RFM Score 为 8.8，Value Proxy Score 为 61.97。业务角色：高价值沉睡资产。
+- Regular Retained Customers：307 个用户，占比 30.7%，Weighted AOV 为 253.79，Avg RFM Score 为 9.16，Value Proxy Score 为 43.94。业务角色：稳定流量基本盘。
+- Other Customers：91 个用户，占比 9.1%，Weighted AOV 为 289.51，Avg RFM Score 为 6.02，Value Proxy Score 为 21.32。业务角色：长尾培育人群。
 
-### High-value Customer Insight
-- High-value Customers: 122 customers (12.2%), weighted AOV 523.72, average RFM 13.02, value proxy score 72.84. Role: Core profit engine.
-Recommended action: protect this group with VIP retention, loyalty benefits, and category-specific premium recommendations based on its recorded category preference.
+### 高价值客户洞察
+- High-value Customers：122 个用户，占比 12.2%，Weighted AOV 为 523.72，Avg RFM Score 为 13.02，Value Proxy Score 为 72.84。业务角色：核心利润来源。
+建议动作：围绕该分群已记录的品类偏好，设计 VIP 留存、会员权益和高价值品类推荐，优先保护利润来源。
 
-### Churn-risk Customer Insight
-- Churn-risk Customers: 188 customers (18.8%), weighted AOV 812.1, average RFM 8.8, value proxy score 61.97. Role: Dormant premium assets.
-Recommended action: use a controlled win-back campaign with service follow-up and product reminders. Do not execute until business owners verify the churn definition and contact policy.
+### 流失风险客户洞察
+- Churn-risk Customers：188 个用户，占比 18.8%，Weighted AOV 为 812.1，Avg RFM Score 为 8.8，Value Proxy Score 为 61.97。业务角色：高价值沉睡资产。
+建议动作：使用可控的召回活动、服务跟进和产品提醒。执行前需要业务负责人复核流失定义和触达策略。
 
-### Marketing Recommendations
-- Potential customers: 29.2% of customers are marked as a conversion opportunity. Use repurchase incentives and bundles only after checking margin impact.
-- Elite segment: Female customers around age 51 show the highest weighted AOV (1001.62) among sufficiently sized groups.
-- Regional opportunity: Suburban customers in the Apparel category show strong weighted AOV (681.24).
-- Value concentration: The top 10% users contribute approximately 18.6% of total spending.
-- Churn recovery: Build win-back campaigns with product upgrade reminders, after-sales recovery, and service follow-up.
+### 营销建议
+- 潜力用户：29.2% 的用户被识别为转化机会。建议在评估毛利影响后使用复购激励和组合推荐。
+- 高客单细分信号：女性客户中约 51 岁客群的 Weighted AOV 为 1001.62，应作为高客单重点观察人群。
+- 区域品类机会：Suburban 地区 Apparel 品类客户的 Weighted AOV 为 681.24，说明区域品类组合存在运营机会。
+- 价值集中度：Top 10% 用户贡献约 18.6% 的总消费，说明消费贡献存在集中度。
+- 流失召回：使用产品升级提醒、售后关怀和服务跟进进行召回。
 
-### Human Review Reminder
-- Verify raw data freshness, segment rules, and campaign eligibility before any customer-facing execution.
-- Treat this output as decision support, not automated campaign approval.
+### 人工复核提醒
+- 面向客户执行前，请复核 raw 数据新鲜度、分群规则和活动资格。
+- 本输出仅用于决策辅助，不代表自动批准营销活动。
 
-Additional data-backed signals:
-- Suburban customers in the Apparel category show strong weighted AOV (681.24).
-- The top 10% users contribute approximately 18.6% of total spending.
+补充的结构化数据信号：
+- Suburban 地区 Apparel 品类客户的 Weighted AOV 为 681.24，说明区域品类组合存在运营机会。
+- Top 10% 用户贡献约 18.6% 的总消费，说明消费贡献存在集中度。
 
-## Human Review Reminder
-- Review segment definitions, raw data freshness, and campaign eligibility before execution.
-- Validate all AI-generated recommendations against margin, inventory, logistics, and compliance constraints.
-- This report supports BI decision preparation only; it does not approve customer-facing actions.
+## Human Review 人工复核提醒
+- 执行前请复核分群定义、raw 数据新鲜度和活动资格。
+- 请结合毛利、库存、物流、客服和合规约束复核 AI 生成建议。
+- 本报告只支持 BI 决策准备，不代表自动批准面向客户的运营动作。
 
-## Structured Summary Used By LLM
+## LLM 使用的 Structured Summary
 ```json
 {
-  "run_time_utc": "2026-06-23T01:05:47Z",
+  "run_time_utc": "2026-06-23T02:34:51Z",
   "data_sources": [
     {
       "path": "data/raw/ecommerce_user_behavior_dataset.csv",

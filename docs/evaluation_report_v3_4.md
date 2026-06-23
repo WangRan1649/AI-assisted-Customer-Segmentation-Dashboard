@@ -32,19 +32,21 @@ Current coverage includes:
 - `list_demo_cases`
 - `compare_demo_cases`
 - `workflow_status`
+- `rfm_summary_question`
 - `explain_powerbi_workflow`
 - `run_workflow` dry-run
 - high-risk delete/reset requests
 - unknown questions
 
-The dataset currently contains 14 cases, mostly Chinese questions with a few English examples.
+The dataset currently contains 15 cases, mostly Chinese questions with a few English examples.
+For V3.5, expected answer keywords were updated to match the Chinese-first business-facing Agent responses.
 
 ## Current Eval Summary
 
 Latest local run:
 
 ```text
-Total cases: 14
+Total cases: 15
 Intent accuracy: 100.0%
 Tool selection accuracy: 100.0%
 Risk level accuracy: 100.0%

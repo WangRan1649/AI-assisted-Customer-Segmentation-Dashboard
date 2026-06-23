@@ -60,6 +60,20 @@ def _build_steps(intent: str) -> list[AgentStep]:
             )
         ]
 
+    if intent == "rfm_summary_question":
+        return [
+            AgentStep(
+                name="Read customer segment summary",
+                tool="pandas:data/processed/customer_segments.csv",
+                description="Read Python-computed segment counts, shares, weighted AOV, and RFM scores.",
+            ),
+            AgentStep(
+                name="Explain RFM summary",
+                tool="python:pandas",
+                description="Summarize RFM segment results without calling an LLM.",
+            ),
+        ]
+
     if intent == "run_workflow":
         return [
             AgentStep(
@@ -105,13 +119,14 @@ def route_request(request: AgentRequest) -> AgentPlan:
             requires_execution=False,
             dry_run=True,
             refusal_reason=(
-                "High-risk file operation detected. This lightweight agent does not delete, "
-                "clear, reset, or overwrite non-raw project files."
+                "检测到高风险文件操作。当前轻量 Agent 不会删除、清空、重置或覆盖非 raw 数据文件。"
             ),
         )
 
     if _contains_any(normalized, ["切换", "运行 workflow", "run workflow", "刷新 power bi", "apply_raw_case"]):
         intent = "run_workflow"
+    elif _contains_any(normalized, ["rfm", "用户 rfm", "rfm 是多少", "rfm是多少", "客户分群结果", "用户分群结果"]):
+        intent = "rfm_summary_question"
     elif _contains_any(normalized, ["列出", "可用", "list", "demo cases", "数据场景", "场景"]):
         intent = "list_demo_cases"
     elif _contains_any(normalized, ["对比", "compare", "变化", "baseline", "apparel_vip_shift"]):

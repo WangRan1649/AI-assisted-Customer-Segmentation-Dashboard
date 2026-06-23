@@ -75,6 +75,36 @@ BUSINESS_NUMBER_KEYWORDS = {
     "users",
     "value",
     "¥",
+    "客户",
+    "用户",
+    "占比",
+    "比例",
+    "客单价",
+    "加权客单价",
+    "评分",
+    "分数",
+    "分群",
+    "金额",
+    "消费",
+    "总消费",
+    "购买",
+    "频次",
+    "复购",
+    "活跃",
+    "流失",
+    "召回",
+    "留存",
+    "年龄",
+    "岁",
+    "天",
+    "行",
+    "数据",
+    "指标",
+    "价值",
+    "收入",
+    "贡献",
+    "排名",
+    "第",
 }
 
 
@@ -167,13 +197,11 @@ def call_siliconflow(prompt: str) -> tuple[str, str, int]:
             {
                 "role": "system",
                 "content": (
-                    "You are a BI decision workflow assistant. Use only the structured "
-                    "summary supplied by the user. Do not invent metrics, percentages, "
-                    "segments, categories, customer counts, ages, AOV values, scores, "
-                    "frequencies, recency values, spending amounts, campaign timing, "
-                    "discount rates, or rankings. Copy business numbers from the summary "
-                    "instead of estimating them. If a detail is absent, say that human "
-                    "review is required."
+                    "你是一个 BI 决策工作流助手，必须使用中文输出。只能使用用户提供的 "
+                    "structured summary。不要编造指标、百分比、分群规模、客户数、品类、"
+                    "年龄、AOV、RFM 分数、Value Proxy Score、频次、最近活跃、消费金额、"
+                    "活动周期、折扣率或排名。业务数字必须从 structured summary 中复制，"
+                    "不要估算、重算或补充。如果缺少某个细节，请说明需要人工复核。"
                 ),
             },
             {"role": "user", "content": prompt},
@@ -377,14 +405,60 @@ def insight_by_name(summary: dict[str, Any], keyword: str) -> dict[str, Any]:
 
 def format_segment_line(segment: dict[str, Any]) -> str:
     if not segment:
-        return "- Segment data is unavailable and requires human review."
+        return "- 分群数据不可用，需要人工复核。"
+
+    role_mapping = {
+        "Core profit engine": "核心利润来源",
+        "Growth engine": "增长转化池",
+        "Dormant premium assets": "高价值沉睡资产",
+        "Traffic foundation": "稳定流量基本盘",
+        "Long-tail users": "长尾培育人群",
+    }
+    role = role_mapping.get(str(segment.get("business_role", "")), segment.get("business_role"))
 
     return (
-        f"- {segment.get('segment')}: {segment.get('customer_count')} customers "
-        f"({segment.get('share')}), weighted AOV {segment.get('weighted_aov')}, "
-        f"average RFM {segment.get('avg_rfm_score')}, value proxy score "
-        f"{segment.get('avg_value_proxy_score')}. Role: {segment.get('business_role')}."
+        f"- {segment.get('segment')}：{segment.get('customer_count')} 个用户，"
+        f"占比 {segment.get('share')}，Weighted AOV 为 {segment.get('weighted_aov')}，"
+        f"Avg RFM Score 为 {segment.get('avg_rfm_score')}，Value Proxy Score 为 "
+        f"{segment.get('avg_value_proxy_score')}。业务角色：{role}。"
     )
+
+
+def insight_summary_cn(insight: dict[str, Any]) -> str:
+    if not insight:
+        return "当前没有可用的跨维度洞察，需要人工复核。"
+
+    name = str(insight.get("insight_name", ""))
+    key_finding = str(insight.get("key_finding", ""))
+    numbers = NUMBER_PATTERN.findall(key_finding)
+
+    if "Elite" in name and len(numbers) >= 2:
+        return f"女性客户中约 {numbers[0]} 岁客群的 Weighted AOV 为 {numbers[1]}，应作为高客单重点观察人群。"
+    if "Regional" in name and numbers:
+        return f"Suburban 地区 Apparel 品类客户的 Weighted AOV 为 {numbers[-1]}，说明区域品类组合存在运营机会。"
+    if "Pareto" in name and len(numbers) >= 2:
+        return f"Top {numbers[0]} 用户贡献约 {numbers[1]} 的总消费，说明消费贡献存在集中度。"
+    if "Churn" in name and numbers:
+        return f"{numbers[0]} 的用户属于高消费但近期不活跃人群，且偏好 Home & Kitchen，应优先做召回。"
+    if "High-value" in name:
+        return "高价值用户对 Apparel 的偏好最强，可用于设计 VIP 品类包和会员权益。"
+
+    return key_finding or "当前没有可用的跨维度洞察，需要人工复核。"
+
+
+def recommended_action_cn(insight: dict[str, Any]) -> str:
+    name = str(insight.get("insight_name", ""))
+    if "Elite" in name:
+        return "设计高价值商品、专家内容和 VIP 服务权益。"
+    if "Regional" in name:
+        return "围绕区域和品类偏好设计组合商品与内容活动。"
+    if "Pareto" in name:
+        return "优先把留存和服务资源投入到高价值用户。"
+    if "Churn" in name:
+        return "使用产品升级提醒、售后关怀和服务跟进进行召回。"
+    if "High-value" in name:
+        return "围绕 Apparel 品类设计 VIP 组合和忠诚度权益。"
+    return "需要业务人员结合活动资源进一步复核。"
 
 
 def build_mock_response(summary: dict[str, Any]) -> str:
@@ -400,29 +474,29 @@ def build_mock_response(summary: dict[str, Any]) -> str:
         format_segment_line(segment) for segment in summary.get("segment_results", [])
     )
 
-    return f"""## LLM Draft Business Interpretation
+    return f"""## LLM 中文业务解读草稿
 
-### Core Customer Segment Results
+### 核心客户分群结果
 {segment_lines}
 
-### High-value Customer Insight
+### 高价值客户洞察
 {format_segment_line(high_value)}
-Recommended action: protect this group with VIP retention, loyalty benefits, and category-specific premium recommendations based on its recorded category preference.
+建议动作：围绕该分群已记录的品类偏好，设计 VIP 留存、会员权益和高价值品类推荐，优先保护利润来源。
 
-### Churn-risk Customer Insight
+### 流失风险客户洞察
 {format_segment_line(churn)}
-Recommended action: use a controlled win-back campaign with service follow-up and product reminders. Do not execute until business owners verify the churn definition and contact policy.
+建议动作：使用可控的召回活动、服务跟进和产品提醒。执行前需要业务负责人复核流失定义和触达策略。
 
-### Marketing Recommendations
-- Potential customers: {potential.get('share', 'N/A')} of customers are marked as a conversion opportunity. Use repurchase incentives and bundles only after checking margin impact.
-- Elite segment: {elite.get('key_finding', 'No elite segment insight was available.')}
-- Regional opportunity: {regional.get('key_finding', 'No regional category insight was available.')}
-- Value concentration: {pareto.get('key_finding', 'No value concentration insight was available.')}
-- Churn recovery: {churn_recovery.get('recommended_action', 'No churn recovery action was available.')}
+### 营销建议
+- 潜力用户：{potential.get('share', 'N/A')} 的用户被识别为转化机会。建议在评估毛利影响后使用复购激励和组合推荐。
+- 高客单细分信号：{insight_summary_cn(elite)}
+- 区域品类机会：{insight_summary_cn(regional)}
+- 价值集中度：{insight_summary_cn(pareto)}
+- 流失召回：{recommended_action_cn(churn_recovery)}
 
-### Human Review Reminder
-- Verify raw data freshness, segment rules, and campaign eligibility before any customer-facing execution.
-- Treat this output as decision support, not automated campaign approval.
+### 人工复核提醒
+- 面向客户执行前，请复核 raw 数据新鲜度、分群规则和活动资格。
+- 本输出仅用于决策辅助，不代表自动批准营销活动。
 """
 
 

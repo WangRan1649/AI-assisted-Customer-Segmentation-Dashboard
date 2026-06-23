@@ -362,6 +362,22 @@ Results are written to:
 eval/eval_results.csv
 ```
 
+## V3.5 Streamlit Agent Workbench
+
+V3.5 adds a lightweight staff-facing Streamlit page on top of the existing Router Agent, Orchestrator, Skill Layer, and Eval Harness.
+
+The UI is Chinese-first for HR/interviewer demos, while keeping technical fields such as `Provider`, `Intent`, `Tools`, `Risk Level`, `Dry Run`, commands, file names, and stable CSV fields in English. The layout uses a clean consulting-style dashboard design: white background, dark navy accents, thin dividers, compact cards, and high information density.
+
+It supports natural-language workflow questions, Chinese RFM summary lookup from `data/processed/customer_segments.csv`, Power BI output preview, eval result preview, and explicit sidebar buttons for applying a demo raw case, running the pipeline, or running the eval harness.
+
+The page defaults to `mock` provider. It does not automatically switch raw data, run the pipeline, or call the real API. Actions that can modify local workflow outputs require a button click.
+
+Run:
+
+```cmd
+.venv\Scripts\streamlit.exe run streamlit_agent_app.py
+```
+
 ## Future Work
 
 The following items are future directions, not completed V3 features:
