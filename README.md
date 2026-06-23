@@ -1,389 +1,126 @@
-# AI-assisted Customer Segmentation Dashboard V3
+# AI-assisted Customer Segmentation Dashboard
 
-## Project Overview
+**基于 RFM、Power BI、LLM 洞察与 Agent Workbench 的 AI 辅助商业智能分析系统**
 
-This project is an **AI-assisted BI Decision Workflow for e-commerce customer segmentation**. It combines Python data processing, RFM-style customer analytics, SiliconFlow API-based LLM insight generation, and Power BI reporting.
+这是一个 **AI-assisted BI Workflow** 作品集项目。它不是静态 Power BI 看板，也不是普通 AI 聊天机器人，而是把数据处理、客户分群、经营洞察、Power BI 刷新、自然语言问答和 Agent 编排串成一个可重复运行的分析闭环。
 
-V3 turns the project from a static customer segmentation dashboard into a repeatable decision workflow: when raw e-commerce data is replaced under `data/raw/`, one pipeline command regenerates processed customer segments, AI-assisted business insights, Power BI-readable insight tables, and auditable run metadata.
+## 项目解决的问题
 
-The system supports both **Mock mode** and **SiliconFlow API mode**. The V3 pipeline has been verified with SiliconFlow API using:
+传统 BI 往往只展示图表结果，业务人员还需要自己解释指标、追问原因、整理洞察和设计运营动作。普通 LLM 虽然能生成文字，但容易编造数字、缺少指标口径，也难以评估回答是否可靠。
 
-```text
-requested_provider = siliconflow
-provider = siliconflow
-model = deepseek-ai/DeepSeek-V4-Flash
-api_reached = True
-validation_passed = True
-fallback_used = False
-error = None
-raw_row_count = 1001
-processed_customer_count = 1000
+本项目通过 **Python Pipeline + Skill Layer + LLM Insight + Power BI + Streamlit Agent Workbench + Eval Harness** 形成闭环：
+
+- Python 负责确定性计算，输出 RFM 分群、用户级 scored fact table 和 structured summary。
+- LLM 只负责把结构化 summary 转成中文经营洞察，不直接计算业务数字。
+- Router Agent / Orchestrator 负责识别业务问题并编排已有 Skill。
+- Power BI 和 Streamlit 读取同一套 pipeline 输出，保证图表和 AI 洞察一致。
+- Eval Harness 用测试集验证 Router / Agent 行为的稳定性。
+
+## 核心业务价值
+
+- raw 数据源变化后，可一键重跑 pipeline。
+- 自动生成 RFM 客户分群、用户级评分明细表和中文 AI 经营洞察。
+- Power BI 刷新后，主图表和 AI Insight Box 同步更新。
+- 业务人员可在 Streamlit 页面输入自然语言问题，例如“这个数据的用户 RFM 是多少？”。
+- Eval Harness 验证 Router / Orchestrator 的意图识别、工具选择、风险边界和回答关键内容。
+- Mock / SiliconFlow 双模式支持稳定演示和真实 API 展示。
+- Numeric validation / fallback 机制降低 LLM 编造业务数字的风险。
+
+## 系统架构
+
+```mermaid
+flowchart LR
+    A["data/demo_cases"] --> B["data/raw"]
+    B --> C["Python Pipeline"]
+    C --> D["Skill Layer"]
+    D --> E["data/processed"]
+    D --> F["outputs"]
+    F --> G["Power BI"]
+    F --> H["Streamlit Agent Workbench"]
+    H --> I["Router Agent / Orchestrator"]
+    I --> D
+    I --> J["Eval Harness"]
 ```
 
-## V3 Upgrade Highlights
-
-- Reads raw e-commerce CSV files from `data/raw/`.
-- Cleans raw data and regenerates `data/processed/customer_segments.csv`.
-- Generates `data/processed/fact_user_behavior_scored.csv` as the user-level scored fact table for Power BI main visuals.
-- Calculates RFM metrics, weighted AOV, Value Proxy Score, customer segments, and cross-dimensional insights in Python.
-- Builds a structured summary from Python-computed results before calling the LLM.
-- Supports SiliconFlow API mode for real LLM-generated business wording.
-- Keeps Mock mode for local demos, offline testing, and fallback output.
-- Uses numeric validation to reduce unsupported business-number hallucination.
-- Falls back to Mock output when API calls fail or validation fails.
-- Writes `outputs/run_metadata.json` to audit provider, model, fallback status, validation status, raw rows, customer count, and generated files.
-
-## Business Context
-
-E-commerce teams often already have BI dashboards, but dashboards usually stop at visualization. Business users still need to interpret charts, identify customer risks, write summary reports, and design campaign actions.
-
-This project addresses that gap by connecting BI metrics with an AI-assisted decision layer. Python remains responsible for the quantitative calculations, while the LLM converts structured data into marketing insights and human-reviewable recommendations.
-
-The goal is not to replace analysts. The goal is to reduce repetitive reporting work and help business teams move from dashboard viewing to decision preparation.
-
-## Current Customer Segment Results
-
-The latest V3 run processed **1,001 raw rows** and generated **1,000 processed customers**.
-
-| Segment | Customers | Share | Weighted AOV | Avg RFM Score | Action Priority |
-|---|---:|---:|---:|---:|---|
-| High-value Customers | 122 | 12.2% | 523.72 | 13.02 | Stabilize |
-| Potential Customers | 292 | 29.2% | 1319.66 | 8.47 | Convert |
-| Churn-risk Customers | 188 | 18.8% | 812.10 | 8.80 | Recover |
-| Regular Retained Customers | 307 | 30.7% | 253.79 | 9.16 | Upsell |
-| Other Customers | 91 | 9.1% | 289.51 | 6.02 | Nurture |
-
-Current cross-dimensional insights:
-
-- Female customers around age 51 show the highest weighted AOV: 1001.62.
-- Suburban customers in the Apparel category show weighted AOV: 681.24.
-- Top 10% users contribute approximately 18.6% of total spending.
-- Churn-risk customers have strongest preference in Home & Kitchen.
-- High-value customers show strongest preference in Apparel.
-
-## Tech Stack
-
-| Layer | Tools / Methods |
-|---|---|
-| Data Layer | CSV, Python, pandas |
-| Metrics Layer | RFM, weighted AOV, Value Proxy Score |
-| AI Layer | Mock provider, SiliconFlow API, structured prompt |
-| Validation Layer | Numeric validation against Python structured summary |
-| Output Layer | Markdown report, Power BI insight CSV, run metadata JSON |
-| BI Layer | Power BI, DAX, refreshable CSV outputs |
-| Governance | Fallback mechanism, human-in-the-loop review |
-
-## Repository Structure
-
-```text
-AI-assisted-Customer-Segmentation-Dashboard/
-|-- data/
-|   |-- raw/
-|   |-- processed/
-|   `-- dictionary/
-|-- docs/
-|-- llm_agent/
-|   |-- src/
-|   |-- prompt_templates/
-|   `-- outputs/
-|-- outputs/
-|-- portfolio/
-|-- powerbi/
-|-- sql/
-|-- run_pipeline.py
-|-- run_pipeline.ps1
-|-- requirements.txt
-|-- .env.example
-|-- README.md
-`-- README_CN.md
-```
-
-## One-click Pipeline
-
-The V3 pipeline regenerates the main business artifacts in one run:
-
-```text
-data/raw/*.csv
-        ->
-Python cleaning and RFM/value scoring
-        ->
-data/processed/fact_user_behavior_scored.csv
-data/processed/customer_segments.csv
-        ->
-Consistent segment counts for BI visuals and AI insights
-        ->
-Structured summary
-        ->
-Mock provider or SiliconFlow API
-        ->
-outputs/segment_insights.md
-outputs/powerbi_llm_insights.csv
-outputs/run_metadata.json
-```
-
-Generated files:
-
-- `data/processed/fact_user_behavior_scored.csv`
-- `data/processed/customer_segments.csv`
-- `outputs/segment_insights.md`
-- `outputs/powerbi_llm_insights.csv`
-- `outputs/run_metadata.json`
-
-For compatibility with the earlier Power BI prototype, AI insight outputs are also mirrored under `llm_agent/outputs/`.
-
-## Mock Mode and SiliconFlow API Mode
-
-The system supports two provider modes.
-
-**Mock mode** is used for local demos, deterministic testing, and fallback output. It does not call any external API.
-
-```powershell
-.venv\Scripts\python.exe run_pipeline.py --provider mock
-```
-
-**SiliconFlow API mode** calls the configured SiliconFlow-compatible chat completion endpoint and validates the returned business numbers before accepting the result.
-
-```powershell
-.venv\Scripts\python.exe run_pipeline.py --provider siliconflow
-```
-
-## How to Configure `.env`
-
-Create a local `.env` file in the project root. Do not commit `.env` because it contains secrets.
-
-```env
-LLM_PROVIDER=siliconflow
-SILICONFLOW_API_KEY=your_api_key
-SILICONFLOW_BASE_URL=https://api.siliconflow.cn/v1
-SILICONFLOW_MODEL=deepseek-ai/DeepSeek-V4-Flash
-```
-
-For Mock mode:
-
-```env
-LLM_PROVIDER=mock
-```
-
-The provider can also be overridden per run with `--provider mock` or `--provider siliconflow`.
-
-## How to Run Locally
-
-From Windows PowerShell or Windows cmd:
-
-```powershell
-cd D:\chatgpt\AI-assisted-Customer-Segmentation-Dashboard
-python -m venv .venv
-.venv\Scripts\python.exe -m pip install -r requirements.txt
-```
-
-Run Mock mode:
-
-```powershell
-.venv\Scripts\python.exe run_pipeline.py --provider mock
-```
-
-Run SiliconFlow API mode:
-
-```powershell
-.venv\Scripts\python.exe run_pipeline.py --provider siliconflow
-```
-
-You can also use the PowerShell helper:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File run_pipeline.ps1
-```
-
-## How to Verify Real API Success through `outputs/run_metadata.json`
-
-Open `outputs/run_metadata.json` after running the pipeline.
-
-A successful real SiliconFlow API run should include:
-
-```json
-{
-  "requested_provider": "siliconflow",
-  "provider": "siliconflow",
-  "api_reached": true,
-  "validation_passed": true,
-  "fallback_used": false,
-  "error": null
-}
-```
-
-The verified V3 local run used:
-
-```text
-model = deepseek-ai/DeepSeek-V4-Flash
-raw_row_count = 1001
-processed_customer_count = 1000
-```
-
-If `provider` is `mock` while `requested_provider` is `siliconflow`, the system used fallback output. Check `api_reached`, `validation_passed`, and `error` to see whether the cause was API access or validation failure.
-
-## AI Insight Outputs
-
-`data/processed/fact_user_behavior_scored.csv` is the recommended fact table for Power BI main visuals. It contains one row per user with original user fields, RFM scores, weighted AOV, Value Proxy Score, English segment name, Chinese segment name, business role, and action priority.
-
-`outputs/segment_insights.md` contains:
-
-- Project run time
-- Data source
-- Core customer segment results
-- High-value customer insights
-- Churn-risk customer insights
-- Marketing recommendations
-- Human Review reminder
-- Structured Summary Used By LLM
-
-`outputs/powerbi_llm_insights.csv` contains Power BI-readable insight rows with:
-
-- `insight_title`
-- `insight_text`
-- `segment_name`
-- `priority`
-- `review_status`
-- `generated_at`
-
-`outputs/run_metadata.json` records:
-
-- `run_time_utc`
-- `raw_files`
-- `raw_row_count`
-- `processed_customer_count`
-- `requested_provider`
-- `provider`
-- `model`
-- `api_reached`
-- `validation_passed`
-- `fallback_used`
-- `error`
-- `retry_count`
-- `error_type`
-- `output_files`
-
-## Power BI Integration
-
-Power BI should use the regenerated CSV outputs from the same V3 pipeline:
-
-- Main BI visuals should read `data/processed/fact_user_behavior_scored.csv`.
-- The AI Insight Box should read `outputs/powerbi_llm_insights.csv`.
-
-This keeps the pie charts, bar charts, customer counts, and AI insight text aligned with the same segment logic from one pipeline run.
-
-If Power BI visuals and the AI Insight Box show different segment counts, the usual cause is that the main Power BI visuals are still connected to an old table, such as `Fact_User_Behavior`, or to an old segment field. Repoint those visuals to `data/processed/fact_user_behavior_scored.csv` and use `segment_name` or `segment_name_cn` from that file.
-
-After running the pipeline, open:
-
-```text
-powerbi/AI_Customer_Segmentation_Dashboard.pbix
-```
-
-Then click **Home -> Refresh** in Power BI Desktop.
-
-The AI-generated recommendations are designed as reviewable insight text, not as automated campaign execution.
-
-## Numeric Validation
-
-Python calculates the business metrics first and passes a structured summary to the LLM. The LLM is instructed to use only those numbers.
-
-Numeric validation checks the LLM response against the structured summary to reduce unsupported business-number hallucination. The validation is designed to:
-
-- Allow section numbering and list numbering.
-- Allow reasonable rounding of numbers already present in the structured summary.
-- Allow percentage and decimal representations within a small tolerance.
-- Focus on business-number contexts such as customers, share, weighted AOV, RFM score, Value Proxy Score, recency, spending, and frequency.
-- Reject obvious new business metrics that are not supported by Python-computed results.
-
-This keeps the guardrail practical: it reduces hallucinated business metrics without blocking normal report formatting.
-
-## Fallback Mechanism
-
-The pipeline keeps running even when the API path fails.
-
-Fallback can happen when:
-
-- The API key is missing or invalid.
-- The API endpoint cannot be reached.
-- The provider returns an invalid response.
-- Numeric validation rejects unsupported business numbers.
-
-When fallback is used, `outputs/run_metadata.json` records `fallback_used = true` and stores the error message. This makes the result auditable while preserving a usable Mock output for demos and Power BI refresh.
-
-## Human-in-the-loop Review
-
-AI-generated recommendations are decision-support drafts only. Before any marketing campaign is executed, business users should review:
-
-- Segment definitions and raw data freshness.
-- Whether the recommendation matches business reality.
-- Campaign eligibility, compliance, and brand tone.
-- Inventory, logistics, customer support, and after-sales capacity.
-- Whether the final campaign should be approved, revised, or rejected.
-
-## Business Value
-
-This project demonstrates how AI can improve BI decision workflows by:
-
-- Turning static dashboard outputs into decision-ready summaries.
-- Reducing repetitive manual reporting work.
-- Connecting customer segmentation results with marketing actions.
-- Keeping business metrics grounded in Python-computed structured data.
-- Making API usage, validation, and fallback status auditable.
-- Preserving human responsibility for final business decisions.
-
-## Role Relevance
-
-This project is relevant to AI Solutions Intern, AI Product Intern, AI Pre-sales Intern, Data Analyst, BI Analyst, and Technical Consultant roles.
-
-It demonstrates:
-
-- Data cleaning and customer segmentation workflow design.
-- RFM and customer value metric modeling.
-- LLM API integration with operational guardrails.
-- Power BI integration and refreshable insight outputs.
-- Human-in-the-loop AI governance.
-- Clear communication of business value and technical implementation.
-
-## V3.4 Eval Harness
-
-V3.4 adds a lightweight evaluation harness for the Router Agent and Orchestrator. It tests intent routing, tool selection, risk classification, dry-run safety, high-risk refusal behavior, and whether answers contain required business keywords.
-
-The eval is deterministic and local. It does not call SiliconFlow, does not switch raw data, does not run the pipeline, and does not modify Power BI files.
-
-Run:
+架构说明：
+
+- **Python Skill** 负责确定性计算，包括数据清洗、RFM、Weighted AOV、分群和导出。
+- **LLM** 只解释结构化 summary，不直接算数。
+- **Router Agent** 负责任务识别和安全边界判断。
+- **Orchestrator** 只调用白名单 Skill 和本地脚本，不执行任意 shell。
+- **Eval Harness** 用测试集验证 Agent 行为可靠性。
+
+## 功能亮点
+
+- 场景化 raw 数据源切换：`baseline_original` / `apparel_vip_shift`
+- RFM 客户分群与用户级 scored fact table
+- Weighted AOV 指标口径，避免简单平均造成误导
+- 中文 AI 经营洞察与 Markdown 报告
+- Power BI 联动刷新：主图表读取 scored fact，AI Insight Box 读取 insight CSV
+- Streamlit 业务展示页：KPI cards、分群图表、洞察卡片、自然语言问答
+- Router Agent / Orchestrator：确定性路由与轻量编排
+- Eval Harness：当前测试集可达到 100% pass rate
+- Mock / SiliconFlow 双模式
+- Numeric validation / fallback 防止关键业务数字失控
+
+## 快速演示命令
+
+稳定展示版建议使用 `mock`，不依赖网络和真实 API：
 
 ```cmd
+.venv\Scripts\python.exe scripts\apply_raw_case.py baseline_original
+.venv\Scripts\python.exe run_pipeline.py --provider mock
+.venv\Scripts\python.exe scripts\apply_raw_case.py apparel_vip_shift
+.venv\Scripts\python.exe run_pipeline.py --provider mock
+.venv\Scripts\python.exe -m streamlit run streamlit_agent_app.py
 .venv\Scripts\python.exe eval\run_eval.py
 ```
 
-Results are written to:
+真实 API 展示版：
+
+```cmd
+.venv\Scripts\python.exe run_pipeline.py --provider siliconflow
+```
+
+`.env` 中配置 `SILICONFLOW_API_KEY` 后才会真实调用 API。项目默认不自动调用真实 API。
+
+## 主要输出文件
 
 ```text
+data/processed/fact_user_behavior_scored.csv
+data/processed/customer_segments.csv
+outputs/powerbi_llm_insights.csv
+outputs/segment_insights.md
+outputs/run_metadata.json
 eval/eval_results.csv
 ```
 
-## V3.5 Streamlit Agent Workbench
+## 版本路线
 
-V3.5 adds a lightweight staff-facing Streamlit page on top of the existing Router Agent, Orchestrator, Skill Layer, and Eval Harness.
+- **V3.1 Pipeline**：raw 数据处理、RFM 分群、LLM 洞察、Power BI 输出
+- **V3.2 Skill Layer**：将确定性能力拆成可复用 Skill
+- **V3.3 Router Agent**：新增轻量 Router / Orchestrator / Trace
+- **V3.4 Eval Harness**：用测试集验证 Agent 行为
+- **V3.5 Streamlit Workbench**：新增业务人员前端
+- **V3.5.1 中文业务展示 UI**：中文化展示与咨询风格页面
+- **V4.0 中文作品集交付包装**：面向国内 HR、中文飞书作品集和中文面试讲解
 
-The UI is Chinese-first for HR/interviewer demos, while keeping technical fields such as `Provider`, `Intent`, `Tools`, `Risk Level`, `Dry Run`, commands, file names, and stable CSV fields in English. The layout uses a clean consulting-style dashboard design: white background, dark navy accents, thin dividers, compact cards, and high information density.
+## 适合岗位
 
-It supports natural-language workflow questions, Chinese RFM summary lookup from `data/processed/customer_segments.csv`, Power BI output preview, eval result preview, and explicit sidebar buttons for applying a demo raw case, running the pipeline, or running the eval harness.
+- AI 解决方案实习
+- AI 售前实习
+- 技术顾问实习
+- BI / 数据分析实习
+- LLM 应用实习
 
-The page defaults to `mock` provider. It does not automatically switch raw data, run the pipeline, or call the real API. Actions that can modify local workflow outputs require a button click.
+## 截图占位
 
-Run:
+- Power BI 总览截图：展示分群人数、AOV、AI Insight Box
+- Streamlit 经营总览截图：展示 KPI cards 和分群图表
+- Streamlit 业务问答截图：展示自然语言问题和业务回答
+- Streamlit 洞察输出截图：展示中文 insight cards
+- Eval Harness 截图：展示 100% pass rate
 
-```cmd
-.venv\Scripts\streamlit.exe run streamlit_agent_app.py
-```
+## 项目边界
 
-## Future Work
-
-The following items are future directions, not completed V3 features:
-
-- RFM Skill Agent
-- Safe SQL Skill
-- Agentic BI workflow
-- Evaluation Harness
-- Trace Viewer
+这是作品集 Demo / 原型系统，不夸大为生产上线系统。真实企业落地还需要补充权限控制、数据权限、任务调度、服务化 API、监控告警、审计日志、评估体系扩展和更严格的数据治理。
