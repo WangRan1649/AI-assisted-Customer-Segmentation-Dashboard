@@ -1,5 +1,5 @@
 {
-  "run_time_utc": "2026-06-22T07:30:37Z",
+  "run_time_utc": "2026-06-23T01:05:47Z",
   "raw_files": [
     {
       "path": "data/raw/ecommerce_user_behavior_dataset.csv",
@@ -11,14 +11,14 @@
   "raw_row_count": 1001,
   "cleaned_row_count": 1000,
   "processed_customer_count": 1000,
-  "requested_provider": "siliconflow",
-  "provider": "siliconflow",
-  "model": "deepseek-ai/DeepSeek-V4-Flash",
-  "api_reached": true,
+  "requested_provider": "mock",
+  "provider": "mock",
+  "model": "local-structured-mock-v3",
+  "api_reached": false,
   "validation_passed": true,
   "fallback_used": false,
   "error": null,
-  "retry_count": 1,
+  "retry_count": 0,
   "error_type": null,
   "output_files": {
     "fact_user_behavior_scored": "data/processed/fact_user_behavior_scored.csv",

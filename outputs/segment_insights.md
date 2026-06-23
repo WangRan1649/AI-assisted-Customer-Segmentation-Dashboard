@@ -1,8 +1,8 @@
 # AI-assisted BI Decision Workflow - Segment Insights
 
 ## Project Run Time
-- UTC: 2026-06-22T07:30:37Z
-- Requested provider: siliconflow; actual provider: siliconflow; model: deepseek-ai/DeepSeek-V4-Flash; api reached: True; validation passed: True; fallback used: False; retry count: 1; error type: None.
+- UTC: 2026-06-23T01:05:47Z
+- Requested provider: mock; actual provider: mock; model: local-structured-mock-v3; api reached: False; validation passed: True; fallback used: False; retry count: 0; error type: None.
 
 ## Data Source
 - data/raw/ecommerce_user_behavior_dataset.csv (raw rows: 1001, cleaned rows: 1000, encoding: gbk)
@@ -30,40 +30,33 @@ Churn-risk Customers contains 188 customers (18.8%). Weighted AOV is 812.1, aver
 Recommended action source: Build win-back campaigns with product upgrade reminders, after-sales recovery, and service follow-up.
 
 ## Marketing Recommendations
-## Core Customer Segment Results
+## LLM Draft Business Interpretation
 
-- **High-value Customers** – 12.2% share (122 customers). Core profit engine. Avg total spending CNY 3876.4, avg recency 9.05 days, avg RFM score 13.02, avg value proxy score 72.84. Key issue: need loyalty protection and VIP retention. Action priority: Stabilize.
-- **Potential Customers** – 29.2% share (292 customers). Growth engine. Avg total spending CNY 2661.92, avg recency 12.62 days, avg RFM score 8.47, avg value proxy score 48.19. Key issue: large base but low repurchase frequency. Action priority: Convert.
-- **Churn-risk Customers** – 18.8% share (188 customers). Dormant premium assets. Avg total spending CNY 3866.1, avg recency 24.67 days, avg RFM score 8.8, avg value proxy score 61.97. Key issue: high historical spending but low recent engagement. Action priority: Recover.
-- **Regular Retained Customers** – 30.7% share (307 customers). Traffic foundation. Avg total spending CNY 1706.25, avg recency 15.75 days, avg RFM score 9.16, avg value proxy score 43.94. Key issue: frequent buyers with relatively lower spending. Action priority: Upsell.
-- **Other Customers** – 9.1% share (91 customers). Long-tail users. Avg total spending CNY 572.65, avg recency 14.54 days, avg RFM score 6.02, avg value proxy score 21.32. Key issue: low engagement and limited short-term value. Action priority: Nurture.
+### Core Customer Segment Results
+- High-value Customers: 122 customers (12.2%), weighted AOV 523.72, average RFM 13.02, value proxy score 72.84. Role: Core profit engine.
+- Potential Customers: 292 customers (29.2%), weighted AOV 1319.66, average RFM 8.47, value proxy score 48.19. Role: Growth engine.
+- Churn-risk Customers: 188 customers (18.8%), weighted AOV 812.1, average RFM 8.8, value proxy score 61.97. Role: Dormant premium assets.
+- Regular Retained Customers: 307 customers (30.7%), weighted AOV 253.79, average RFM 9.16, value proxy score 43.94. Role: Traffic foundation.
+- Other Customers: 91 customers (9.1%), weighted AOV 289.51, average RFM 6.02, value proxy score 21.32. Role: Long-tail users.
 
-## High-value Customer Insight
+### High-value Customer Insight
+- High-value Customers: 122 customers (12.2%), weighted AOV 523.72, average RFM 13.02, value proxy score 72.84. Role: Core profit engine.
+Recommended action: protect this group with VIP retention, loyalty benefits, and category-specific premium recommendations based on its recorded category preference.
 
-- **Segment profile**: 122 customers (12.2% share) with avg total spending CNY 3876.4, avg recency 9.05 days, avg RFM score 13.02, avg value proxy score 72.84. Strongest category preference: Apparel.
-- **Cross-dimensional finding**: Female customers around age 51 show the highest weighted AOV (1001.62) among sufficiently sized groups – treat as a priority profit-driving segment.
-- **Pareto concentration**: The top 10% of users contribute approximately 18.6% of total spending, reinforcing the need to protect high-value customers.
-- **Recommended action**: Design premium product campaigns, expert review content, and VIP service benefits for this segment. Use category-specific VIP bundles and loyalty benefits (Apparel focus).
+### Churn-risk Customer Insight
+- Churn-risk Customers: 188 customers (18.8%), weighted AOV 812.1, average RFM 8.8, value proxy score 61.97. Role: Dormant premium assets.
+Recommended action: use a controlled win-back campaign with service follow-up and product reminders. Do not execute until business owners verify the churn definition and contact policy.
 
-## Churn-risk Customer Insight
+### Marketing Recommendations
+- Potential customers: 29.2% of customers are marked as a conversion opportunity. Use repurchase incentives and bundles only after checking margin impact.
+- Elite segment: Female customers around age 51 show the highest weighted AOV (1001.62) among sufficiently sized groups.
+- Regional opportunity: Suburban customers in the Apparel category show strong weighted AOV (681.24).
+- Value concentration: The top 10% users contribute approximately 18.6% of total spending.
+- Churn recovery: Build win-back campaigns with product upgrade reminders, after-sales recovery, and service follow-up.
 
-- **Segment profile**: 188 customers (18.8% share) with avg total spending CNY 3866.1, avg recency 24.67 days, avg RFM score 8.8, avg value proxy score 61.97. Strongest category preference: Home & Kitchen.
-- **Key issue**: High historical spending but low recent engagement – these are dormant premium assets, not low-value inactive users.
-- **Cross-dimensional finding**: 18.8% of users are high-spending but inactive, with strongest preference in Home & Kitchen.
-- **Recommended action**: Build win-back campaigns with product upgrade reminders, after-sales recovery, and service follow-up.
-
-## Marketing Recommendations
-
-- **High-value Customers (Stabilize)**: Launch VIP loyalty programs, exclusive Apparel previews, and personalized service to retain the 12.2% core profit engine.
-- **Potential Customers (Convert)**: Increase repurchase frequency among the 29.2% growth engine through targeted Apparel campaigns, cross-sell bundles, and engagement incentives.
-- **Churn-risk Customers (Recover)**: Execute win-back campaigns focused on Home & Kitchen product upgrades, after-sales service, and re-engagement offers for the 18.8% dormant premium assets.
-- **Regular Retained Customers (Upsell)**: Encourage higher spending among the 30.7% traffic foundation (Electronics preference) with premium product recommendations and tiered rewards.
-- **Other Customers (Nurture)**: Gradually engage the 9.1% long-tail users (Books preference) with low-commitment content and introductory offers.
-- **Cross-segment actions**: Prioritize retention resources for top-value users (top 10% contribute ~18.6% of total spending). Create region-specific product bundles for suburban Apparel customers (weighted AOV 681.24). Design premium campaigns for the high-AOV female ~51 age group.
-
-## Human Review Reminder
-
-All numerical claims in this draft are copied directly from the provided structured summary. No metrics, percentages, segment sizes, customer counts, product categories, rankings, ages, AOV values, RFM scores, Value Proxy Scores, recency values, frequency values, spending amounts, campaign timing, discount rates, or model/provider details have been invented or extrapolated. This output is a draft for human review and must not trigger customer-facing campaigns automatically. Any missing business numbers or context not present in the summary require human investigation before use.
+### Human Review Reminder
+- Verify raw data freshness, segment rules, and campaign eligibility before any customer-facing execution.
+- Treat this output as decision support, not automated campaign approval.
 
 Additional data-backed signals:
 - Suburban customers in the Apparel category show strong weighted AOV (681.24).
@@ -77,7 +70,7 @@ Additional data-backed signals:
 ## Structured Summary Used By LLM
 ```json
 {
-  "run_time_utc": "2026-06-22T07:30:37Z",
+  "run_time_utc": "2026-06-23T01:05:47Z",
   "data_sources": [
     {
       "path": "data/raw/ecommerce_user_behavior_dataset.csv",
