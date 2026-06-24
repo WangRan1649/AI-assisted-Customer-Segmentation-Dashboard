@@ -144,14 +144,14 @@ data/processed/cross_dimensional_insights.csv
 Then it generates:
 
 ```text
-llm_agent/outputs/segment_insights.md
-llm_agent/outputs/powerbi_llm_insights.csv
+outputs/segment_insights.md
+outputs/powerbi_llm_insights.csv
 ```
 
 ### Output 1: Markdown Report
 
 ```text
-llm_agent/outputs/segment_insights.md
+outputs/segment_insights.md
 ```
 
 This file is designed for human reading and portfolio explanation. It includes:
@@ -164,7 +164,7 @@ This file is designed for human reading and portfolio explanation. It includes:
 ### Output 2: Power BI Insight CSV
 
 ```text
-llm_agent/outputs/powerbi_llm_insights.csv
+outputs/powerbi_llm_insights.csv
 ```
 
 This file is designed for Power BI. It contains structured fields:

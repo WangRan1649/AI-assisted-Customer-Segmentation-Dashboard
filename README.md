@@ -113,13 +113,9 @@ eval/eval_results.csv
 - BI / 数据分析实习
 - LLM 应用实习
 
-## 截图占位
+## 项目展示
 
-- Power BI 总览截图：展示分群人数、AOV、AI Insight Box
-- Streamlit 经营总览截图：展示 KPI cards 和分群图表
-- Streamlit 业务问答截图：展示自然语言问题和业务回答
-- Streamlit 洞察输出截图：展示中文 insight cards
-- Eval Harness 截图：展示 100% pass rate
+项目截图和完整 Case Study 已整理在飞书作品集页面中。GitHub 仓库主要用于展示代码结构、运行方式、技术文档和项目实现。
 
 ## 项目边界
 

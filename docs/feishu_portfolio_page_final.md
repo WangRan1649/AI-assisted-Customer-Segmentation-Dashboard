@@ -55,25 +55,25 @@
 
 ### 图 1：Streamlit 经营总览
 
-【插入截图：Streamlit 经营总览】
+截图已放入飞书作品集页面。
 
 说明：展示当前数据源场景、总用户数、最大客户分群、高价值用户数、流失风险用户数，以及分群柱状图 / 环形图 / Weighted AOV 图。
 
 ### 图 2：Agent 业务问答
 
-【插入截图：业务问答：这个数据的用户 RFM 是多少？】
+截图已放入飞书作品集页面。
 
 说明：展示业务人员可以直接用自然语言追问当前数据，系统基于 customer_segments.csv 生成中文经营分析，不让 LLM 自由编造数字。
 
 ### 图 3：Power BI 总览页
 
-【插入截图：Power BI 总览页】
+截图已放入飞书作品集页面。
 
 说明：展示 Power BI 读取 pipeline 输出文件后，客户分群、Weighted AOV、地区品类矩阵和 AI Insight Box 同步变化。
 
 ### 图 4：Eval Harness 结果
 
-【插入截图：Eval Harness 100% pass rate】
+截图已放入飞书作品集页面。
 
 说明：展示 Router / Agent 行为可通过测试集评估，不只是一次性 Demo。
 
